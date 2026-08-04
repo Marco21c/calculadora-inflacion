@@ -1,3 +1,4 @@
+import axios from "axios";
 import type { IpcEntry } from "@/interfaces/ipc";
 
 export const MESES = [
@@ -83,9 +84,7 @@ function parsearFecha(fecha: string | undefined): { anio: number; mes: number } 
 }
 
 export async function fetchIpcData(): Promise<IpcEntry[]> {
-  const respuesta = await fetch(IPC_CSV_URL)
-  if (!respuesta.ok) throw new Error("No se pudo obtener los datos del IPC")
-  const csv = await respuesta.text()
+  const { data: csv } = await axios.get<string>(IPC_CSV_URL, { responseType: "text" })
   const filas = parseCsv(csv)
 
   const entradas: IpcEntry[] = []

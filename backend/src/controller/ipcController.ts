@@ -1,8 +1,9 @@
 import type { Request, Response } from "express"
 import type { IpcEntry } from "../interfaces/ipc.js"
-import { eliminarEntrada, guardarEntrada, listarEntradas } from "../service/ipcService.js"
+import { deleteIpcEntries, getIpcEntries, saveAndReplace, saveIpcEntries } from "../service/ipcService.js"
 
-function esEntradaValida(body: unknown): body is IpcEntry {
+
+function esIpcValida(body: unknown): body is IpcEntry {
   if (typeof body !== "object" || body === null) return false
   const { anio, mes, variacionMensual, inflacionInteranual } = body as Record<string, unknown>
   return (
@@ -18,18 +19,18 @@ function esEntradaValida(body: unknown): body is IpcEntry {
   )
 }
 
-export function obtenerEntradas(_req: Request, res: Response) {
-  res.json(listarEntradas())
+export async function obtenerIpcs(_req: Request, res: Response) {
+  res.json(await getIpcEntries())
 }
 
-export function crearEntrada(req: Request, res: Response) {
+export async function crearIpc(req: Request, res: Response) {
   const body = req.body
-  if (!esEntradaValida(body)) {
+  if (!esIpcValida(body)) {
     res.status(400).json({ error: "Datos inválidos" })
     return
   }
 
-  const entrada = guardarEntrada({
+  const entrada = await saveIpcEntries({
     anio: body.anio,
     mes: body.mes,
     variacionMensual: body.variacionMensual,
@@ -38,11 +39,29 @@ export function crearEntrada(req: Request, res: Response) {
   res.status(201).json(entrada)
 }
 
-export function borrarEntrada(req: Request, res: Response) {
+export async function cargaMasivaIpc(req: Request, res: Response) {
+  const body = req.body
+  if (!Array.isArray(body) || !body.every(esIpcValida)) {
+    res.status(400).json({ error: "Datos inválidos" })
+    return
+  }
+
+  const entradas = await saveAndReplace(
+    body.map((entrada) => ({
+      anio: entrada.anio,
+      mes: entrada.mes,
+      variacionMensual: entrada.variacionMensual,
+      inflacionInteranual: entrada.inflacionInteranual ?? null,
+    })),
+  )
+  res.status(201).json(entradas)
+}
+
+export async function borrarIpc(req: Request, res: Response) {
   const anio = Number(req.params.anio)
   const mes = Number(req.params.mes)
 
-  if (!eliminarEntrada(anio, mes)) {
+  if (!(await deleteIpcEntries(anio, mes))) {
     res.status(404).json({ error: "No existe una entrada para ese período" })
     return
   }

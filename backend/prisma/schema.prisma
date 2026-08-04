@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model IpcEntry {
+  anio                Int
+  mes                 Int
+  variacionMensual    Float  @map("variacion_mensual")
+  inflacionInteranual Float? @map("inflacion_interanual")
+
+  @@id([anio, mes])
+  @@map("ipc_entries")
+}
