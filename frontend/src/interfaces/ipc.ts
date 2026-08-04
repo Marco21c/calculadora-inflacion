@@ -11,10 +11,3 @@ export interface ResultadoInflacion {
   inflacionInteranual: number | null
   periodoInteranual: string
 }
-
-export interface ResultadoInflacion {
-  montoFinal: number
-  inflacionAcumulada: number
-  inflacionInteranual: number | null
-  periodoInteranual: string
-}
