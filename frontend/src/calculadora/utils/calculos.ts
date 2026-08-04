@@ -21,7 +21,7 @@ export function calcularInflacion(
 
   let acumulado = 1
   for (let i = indiceInicio; i <= indiceFin; i++) {
-    acumulado *= 1 + ipcData[i].variacionMensual
+    acumulado *= 1 + ipcData[i].inflacionMensual / 100
   }
 
   const montoFinal = params.monto * acumulado

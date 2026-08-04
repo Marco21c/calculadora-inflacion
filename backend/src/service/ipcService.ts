@@ -2,15 +2,18 @@ import { prisma } from "../db/prisma.js"
 import type { IpcEntry } from "../interfaces/ipc.js"
 
 export function getIpcEntries(): Promise<IpcEntry[]> {
-  return prisma.ipcEntry.findMany({ orderBy: [{ anio: "asc" }, { mes: "asc" }] })
+  return prisma.ipcEntry.findMany({ orderBy: [{ anio: "asc" }, { mes: "desc" }] })
 }
 
 export function saveIpcEntries(entrada: IpcEntry): Promise<IpcEntry> {
   return prisma.ipcEntry.upsert({
     where: { anio_mes: { anio: entrada.anio, mes: entrada.mes } },
     update: {
-      variacionMensual: entrada.variacionMensual,
+      ipc: entrada.ipc,
+      inflacionMensual: entrada.inflacionMensual,
       inflacionInteranual: entrada.inflacionInteranual,
+      promedioAnualIpc: entrada.promedioAnualIpc,
+      variacionInteranualPromedio: entrada.variacionInteranualPromedio,
     },
     create: entrada,
   })
@@ -22,8 +25,11 @@ export function saveAndReplace(entradas: IpcEntry[]): Promise<IpcEntry[]> {
       prisma.ipcEntry.upsert({
         where: { anio_mes: { anio: entrada.anio, mes: entrada.mes } },
         update: {
-          variacionMensual: entrada.variacionMensual,
+          ipc: entrada.ipc,
+          inflacionMensual: entrada.inflacionMensual,
           inflacionInteranual: entrada.inflacionInteranual,
+          promedioAnualIpc: entrada.promedioAnualIpc,
+          variacionInteranualPromedio: entrada.variacionInteranualPromedio,
         },
         create: entrada,
       }),

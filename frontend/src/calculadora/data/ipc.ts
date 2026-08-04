@@ -90,16 +90,28 @@ export async function fetchIpcData(): Promise<IpcEntry[]> {
   const entradas: IpcEntry[] = []
   for (const fila of filas) {
     const fecha = parsearFecha(fila["Fecha"])
-    const variacionMensual = parsearNumero(fila["Auxiliar"])
-    if (!fecha || variacionMensual === null) continue
+    const variacionMensualFraccion = parsearNumero(fila["Auxiliar"])
+    if (!fecha || variacionMensualFraccion === null) continue
     entradas.push({
       anio: fecha.anio,
       mes: fecha.mes,
-      variacionMensual,
+      // El CSV no trae un índice IPC propio: se reconstruye componiendo las
+      // variaciones mensuales a partir de una base 100.
+      ipc: 100,
+      inflacionMensual: variacionMensualFraccion * 100,
       inflacionInteranual: parsearNumero(fila["Inflación interanual"]),
+      promedioAnualIpc: null,
+      variacionInteranualPromedio: null,
     })
   }
   entradas.sort((a, b) => a.anio - b.anio || a.mes - b.mes)
+
+  let indiceAcumulado = 100
+  for (const entrada of entradas) {
+    indiceAcumulado *= 1 + entrada.inflacionMensual / 100
+    entrada.ipc = indiceAcumulado
+  }
+
   return entradas
 }
 

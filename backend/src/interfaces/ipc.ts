@@ -1,6 +1,9 @@
 export interface IpcEntry {
   anio: number
   mes: number
-  variacionMensual: number
+  ipc: number
+  inflacionMensual: number
   inflacionInteranual: number | null
+  promedioAnualIpc: number | null
+  variacionInteranualPromedio: number | null
 }

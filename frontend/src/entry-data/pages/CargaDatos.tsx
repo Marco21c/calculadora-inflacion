@@ -32,7 +32,7 @@ export default function CargaDatos() {
     <div>
       <h1 className="mb-6 text-3xl font-bold text-blue-900/80">Carga de datos del IPC</h1>
 
-      <div className="grid grid-cols-1 gap-10 rounded-2xl bg-teal-500/20 px-10 py-14 md:grid-cols-2">
+      <div className="flex flex-col gap-10 rounded-2xl bg-teal-500/20 px-10 py-14">
         <FormularioIpc onGuardado={recargar} />
 
         <div className="flex flex-col gap-4">
@@ -40,7 +40,7 @@ export default function CargaDatos() {
           {cargando ? (
             <p className="text-sm text-muted-foreground">Cargando...</p>
           ) : (
-            <TablaIpc entradas={entradas} onEliminado={recargar} />
+            <TablaIpc entradas={entradas} onActualizado={recargar} />
           )}
         </div>
       </div>

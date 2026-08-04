@@ -5,5 +5,5 @@ export const ipcEntriesRouter = Router()
 
 ipcEntriesRouter.get("/", obtenerIpcs)
 ipcEntriesRouter.post("/", crearIpc)
-ipcEntriesRouter.post("/bulk", cargaMasivaIpc)
+ipcEntriesRouter.put("/bulk", cargaMasivaIpc)
 ipcEntriesRouter.delete("/:anio/:mes", borrarIpc)

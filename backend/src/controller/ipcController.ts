@@ -2,21 +2,39 @@ import type { Request, Response } from "express"
 import type { IpcEntry } from "../interfaces/ipc.js"
 import { deleteIpcEntries, getIpcEntries, saveAndReplace, saveIpcEntries } from "../service/ipcService.js"
 
+function esOpcionalNumero(valor: unknown): valor is number | null | undefined {
+  return valor === null || valor === undefined || typeof valor === "number"
+}
 
 function esIpcValida(body: unknown): body is IpcEntry {
   if (typeof body !== "object" || body === null) return false
-  const { anio, mes, variacionMensual, inflacionInteranual } = body as Record<string, unknown>
+  const { anio, mes, ipc, inflacionMensual, inflacionInteranual, promedioAnualIpc, variacionInteranualPromedio } =
+    body as Record<string, unknown>
   return (
     Number.isInteger(anio) &&
     Number.isInteger(mes) &&
     (mes as number) >= 1 &&
     (mes as number) <= 12 &&
-    typeof variacionMensual === "number" &&
-    Number.isFinite(variacionMensual) &&
-    (inflacionInteranual === null ||
-      inflacionInteranual === undefined ||
-      typeof inflacionInteranual === "number")
+    typeof ipc === "number" &&
+    Number.isFinite(ipc) &&
+    typeof inflacionMensual === "number" &&
+    Number.isFinite(inflacionMensual) &&
+    esOpcionalNumero(inflacionInteranual) &&
+    esOpcionalNumero(promedioAnualIpc) &&
+    esOpcionalNumero(variacionInteranualPromedio)
   )
+}
+
+function aIpcEntry(body: IpcEntry): IpcEntry {
+  return {
+    anio: body.anio,
+    mes: body.mes,
+    ipc: body.ipc,
+    inflacionMensual: body.inflacionMensual,
+    inflacionInteranual: body.inflacionInteranual ?? null,
+    promedioAnualIpc: body.promedioAnualIpc ?? null,
+    variacionInteranualPromedio: body.variacionInteranualPromedio ?? null,
+  }
 }
 
 export async function obtenerIpcs(_req: Request, res: Response) {
@@ -30,12 +48,7 @@ export async function crearIpc(req: Request, res: Response) {
     return
   }
 
-  const entrada = await saveIpcEntries({
-    anio: body.anio,
-    mes: body.mes,
-    variacionMensual: body.variacionMensual,
-    inflacionInteranual: body.inflacionInteranual ?? null,
-  })
+  const entrada = await saveIpcEntries(aIpcEntry(body))
   res.status(201).json(entrada)
 }
 
@@ -46,14 +59,7 @@ export async function cargaMasivaIpc(req: Request, res: Response) {
     return
   }
 
-  const entradas = await saveAndReplace(
-    body.map((entrada) => ({
-      anio: entrada.anio,
-      mes: entrada.mes,
-      variacionMensual: entrada.variacionMensual,
-      inflacionInteranual: entrada.inflacionInteranual ?? null,
-    })),
-  )
+  const entradas = await saveAndReplace(body.map(aIpcEntry))
   res.status(201).json(entradas)
 }
 

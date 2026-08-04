@@ -8,11 +8,17 @@ interface FormularioIpcProps {
   onGuardado: () => void
 }
 
+const inputClassName =
+  "h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+
 export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
   const [mes, setMes] = useState("")
   const [anio, setAnio] = useState("")
-  const [variacionMensual, setVariacionMensual] = useState("")
+  const [ipc, setIpc] = useState("")
+  const [inflacionMensual, setInflacionMensual] = useState("")
   const [inflacionInteranual, setInflacionInteranual] = useState("")
+  const [promedioAnualIpc, setPromedioAnualIpc] = useState("")
+  const [variacionInteranualPromedio, setVariacionInteranualPromedio] = useState("")
   const [guardando, setGuardando] = useState(false)
 
   async function handleSubmit(evento: React.FormEvent) {
@@ -20,10 +26,18 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
 
     const mesNumero = Number(mes)
     const anioNumero = Number(anio)
-    const variacionNumero = Number(variacionMensual)
+    const ipcNumero = Number(ipc)
+    const inflacionMensualNumero = Number(inflacionMensual)
 
-    if (!mesNumero || !anioNumero || variacionMensual.trim() === "" || Number.isNaN(variacionNumero)) {
-      toast.error("Completá mes, año y variación mensual.")
+    if (
+      !mesNumero ||
+      !anioNumero ||
+      ipc.trim() === "" ||
+      Number.isNaN(ipcNumero) ||
+      inflacionMensual.trim() === "" ||
+      Number.isNaN(inflacionMensualNumero)
+    ) {
+      toast.error("Completá mes, año, IPC e inflación mensual.")
       return
     }
 
@@ -32,14 +46,21 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
       await guardarEntrada({
         mes: mesNumero,
         anio: anioNumero,
-        variacionMensual: variacionNumero / 100,
+        ipc: ipcNumero,
+        inflacionMensual: inflacionMensualNumero,
         inflacionInteranual: inflacionInteranual.trim() === "" ? null : Number(inflacionInteranual),
+        promedioAnualIpc: promedioAnualIpc.trim() === "" ? null : Number(promedioAnualIpc),
+        variacionInteranualPromedio:
+          variacionInteranualPromedio.trim() === "" ? null : Number(variacionInteranualPromedio),
       })
       toast.success(`Período ${MESES[mesNumero - 1]} ${anioNumero} guardado.`)
       setMes("")
       setAnio("")
-      setVariacionMensual("")
+      setIpc("")
+      setInflacionMensual("")
       setInflacionInteranual("")
+      setPromedioAnualIpc("")
+      setVariacionInteranualPromedio("")
       onGuardado()
     } catch {
       toast.error("No se pudo guardar el período. Intentá nuevamente.")
@@ -55,12 +76,7 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
           <label htmlFor="mes" className="text-sm font-semibold text-foreground">
             Mes
           </label>
-          <select
-            id="mes"
-            value={mes}
-            onChange={(e) => setMes(e.target.value)}
-            className="h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
+          <select id="mes" value={mes} onChange={(e) => setMes(e.target.value)} className={inputClassName}>
             <option value="" disabled>
               Mes
             </option>
@@ -82,23 +98,38 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
             value={anio}
             onChange={(e) => setAnio(e.target.value)}
             placeholder="2026"
-            className="h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className={inputClassName}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="variacionMensual" className="text-sm font-semibold text-foreground">
-          Variación mensual (%)
+        <label htmlFor="ipc" className="text-sm font-semibold text-foreground">
+          IPC
         </label>
         <input
-          id="variacionMensual"
+          id="ipc"
           type="number"
           step="0.01"
-          value={variacionMensual}
-          onChange={(e) => setVariacionMensual(e.target.value)}
+          value={ipc}
+          onChange={(e) => setIpc(e.target.value)}
+          placeholder="105.20"
+          className={inputClassName}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="inflacionMensual" className="text-sm font-semibold text-foreground">
+          Inflación mensual (%)
+        </label>
+        <input
+          id="inflacionMensual"
+          type="number"
+          step="0.01"
+          value={inflacionMensual}
+          onChange={(e) => setInflacionMensual(e.target.value)}
           placeholder="2.10"
-          className="h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className={inputClassName}
         />
       </div>
 
@@ -113,7 +144,37 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
           value={inflacionInteranual}
           onChange={(e) => setInflacionInteranual(e.target.value)}
           placeholder="85.40"
-          className="h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className={inputClassName}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="promedioAnualIpc" className="text-sm font-semibold text-foreground">
+          Promedio anual IPC — opcional
+        </label>
+        <input
+          id="promedioAnualIpc"
+          type="number"
+          step="0.01"
+          value={promedioAnualIpc}
+          onChange={(e) => setPromedioAnualIpc(e.target.value)}
+          placeholder="98.30"
+          className={inputClassName}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="variacionInteranualPromedio" className="text-sm font-semibold text-foreground">
+          Variación interanual promedio (%) — opcional
+        </label>
+        <input
+          id="variacionInteranualPromedio"
+          type="number"
+          step="0.01"
+          value={variacionInteranualPromedio}
+          onChange={(e) => setVariacionInteranualPromedio(e.target.value)}
+          placeholder="78.20"
+          className={inputClassName}
         />
       </div>
 

@@ -18,3 +18,8 @@ export async function guardarEntrada(entrada: IpcEntry): Promise<IpcEntry> {
 export async function eliminarEntrada(anio: number, mes: number): Promise<void> {
   await api.delete(`/api/ipc-entries/${anio}/${mes}`)
 }
+
+export async function guardarEntradasMasivo(entradas: IpcEntry[]): Promise<IpcEntry[]> {
+  const { data } = await api.put<IpcEntry[]>("/api/ipc-entries/bulk", entradas)
+  return data
+}
