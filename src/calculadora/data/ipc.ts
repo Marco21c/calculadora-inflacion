@@ -1,3 +1,5 @@
+import type { IpcEntry } from "@/interfaces/ipc";
+
 export const MESES = [
   "Enero",
   "Febrero",
@@ -13,72 +15,102 @@ export const MESES = [
   "Diciembre",
 ]
 
-export interface IpcEntry {
-  anio: number
-  mes: number
-  indice: number
+const MESES_ABREVIADOS: Record<string, number> = {
+  ene: 1,
+  feb: 2,
+  mar: 3,
+  abr: 4,
+  may: 5,
+  jun: 6,
+  jul: 7,
+  ago: 8,
+  sept: 9,
+  oct: 10,
+  nov: 11,
+  dic: 12,
 }
 
-// Serie de ejemplo (no oficial) que simula un IPC mensual creciente, solo
-// para poder ejercitar el cálculo de inflación acumulada e interanual
-// mientras no se dispone de la fuente de datos real.
-const ANIO_INICIO = 2015
-const ANIO_FIN = 2026
+const IPC_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSd3mpW-EyxI96kLL_T6Ao-RvQLHXtpD96S9Jvtpz1FKXvkEm_e-qR1qn-vXrRWWzsNetmFZHoxstYY/pub?output=csv"
 
-function generarSerieIpc(): IpcEntry[] {
-  const serie: IpcEntry[] = []
-  let indice = 100
-  let t = 0
-  for (let anio = ANIO_INICIO; anio <= ANIO_FIN; anio++) {
-    for (let mes = 1; mes <= 12; mes++) {
-      serie.push({ anio, mes, indice: Math.round(indice * 100) / 100 })
-      const tasaMensual = 0.02 + 0.015 * Math.sin(t / 6) + 0.0006 * t
-      indice *= 1 + tasaMensual
-      t++
+
+
+function splitCsvLine(line: string): string[] {
+  const valores: string[] = []
+  let actual = ""
+  let entreComillas = false
+  for (const char of line) {
+    if (char === '"') {
+      entreComillas = !entreComillas
+    } else if (char === "," && !entreComillas) {
+      valores.push(actual.trim())
+      actual = ""
+    } else {
+      actual += char
     }
   }
-  return serie
+  valores.push(actual.trim())
+  return valores
 }
 
-export const IPC_DATA: IpcEntry[] = generarSerieIpc()
+function parseCsv(csv: string): Record<string, string>[] {
+  const lineas = csv.split("\n").filter((linea) => linea.trim().length > 0)
+  if (lineas.length === 0) return []
+  const encabezados = splitCsvLine(lineas[0])
+  return lineas.slice(1).map((linea) => {
+    const valores = splitCsvLine(linea)
+    const fila: Record<string, string> = {}
+    encabezados.forEach((encabezado, i) => {
+      fila[encabezado] = valores[i] ?? ""
+    })
+    return fila
+  })
+}
 
-export function getAniosDisponibles(): number[] {
-  const anios = new Set(IPC_DATA.map((entrada) => entrada.anio))
+function parsearNumero(valor: string | undefined): number | null {
+  if (!valor) return null
+  const normalizado = valor.replace(/\./g, "").replace(",", ".")
+  const numero = Number(normalizado)
+  return Number.isNaN(numero) ? null : numero
+}
+
+function parsearFecha(fecha: string | undefined): { anio: number; mes: number } | null {
+  if (!fecha) return null
+  const [mesAbreviado, anioAbreviado] = fecha.split("-")
+  const mes = MESES_ABREVIADOS[mesAbreviado?.toLowerCase().trim() ?? ""]
+  if (!mes || !anioAbreviado) return null
+  return { anio: 2000 + parseInt(anioAbreviado, 10), mes }
+}
+
+export async function fetchIpcData(): Promise<IpcEntry[]> {
+  const respuesta = await fetch(IPC_CSV_URL)
+  if (!respuesta.ok) throw new Error("No se pudo obtener los datos del IPC")
+  const csv = await respuesta.text()
+  const filas = parseCsv(csv)
+
+  const entradas: IpcEntry[] = []
+  for (const fila of filas) {
+    const fecha = parsearFecha(fila["Fecha"])
+    const variacionMensual = parsearNumero(fila["Auxiliar"])
+    if (!fecha || variacionMensual === null) continue
+    entradas.push({
+      anio: fecha.anio,
+      mes: fecha.mes,
+      variacionMensual,
+      inflacionInteranual: parsearNumero(fila["Inflación interanual"]),
+    })
+  }
+  entradas.sort((a, b) => a.anio - b.anio || a.mes - b.mes)
+  return entradas
+}
+
+export function getAniosDisponibles(ipcData: IpcEntry[]): number[] {
+  const anios = new Set(ipcData.map((entrada) => entrada.anio))
   return Array.from(anios).sort((a, b) => a - b)
 }
 
-export function getIndice(anio: number, mes: number): number | undefined {
-  return IPC_DATA.find((entrada) => entrada.anio === anio && entrada.mes === mes)?.indice
-}
-
-export interface ResultadoInflacion {
-  montoFinal: number
-  inflacionAcumulada: number
-  inflacionInteranual: number | null
-  periodoInteranual: string
-}
-
-export function calcularInflacion(params: {
-  monto: number
-  mesInicio: number
-  anioInicio: number
-  mesFin: number
-  anioFin: number
-}): ResultadoInflacion | null {
-  const indiceInicio = getIndice(params.anioInicio, params.mesInicio)
-  const indiceFin = getIndice(params.anioFin, params.mesFin)
-  if (indiceInicio === undefined || indiceFin === undefined) return null
-
-  const montoFinal = params.monto * (indiceFin / indiceInicio)
-  const inflacionAcumulada = (indiceFin / indiceInicio - 1) * 100
-
-  const indiceFinAnioAnterior = getIndice(params.anioFin - 1, params.mesFin)
-  const inflacionInteranual =
-    indiceFinAnioAnterior !== undefined ? (indiceFin / indiceFinAnioAnterior - 1) * 100 : null
-
-  const periodoInteranual = `${MESES[params.mesFin - 1]} ${params.anioFin - 1} - ${MESES[params.mesFin - 1]} ${params.anioFin}`
-
-  return { montoFinal, inflacionAcumulada, inflacionInteranual, periodoInteranual }
+export function getMesesDisponibles(ipcData: IpcEntry[], anio: number): number[] {
+  return ipcData.filter((entrada) => entrada.anio === anio).map((entrada) => entrada.mes)
 }
 
 export function formatoMoneda(valor: number): string {

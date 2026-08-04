@@ -1,12 +1,25 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import Egreso from "../components/Egreso";
 import Ingreso from "../components/Ingreso";
 import logo from '@/assets/logo.png'
-import { calcularInflacion, getAniosDisponibles } from "../data/ipc";
+import { fetchIpcData, getAniosDisponibles } from "../data/ipc";
+import { calcularInflacion } from "../utils/calculos";
+import type { IpcEntry } from "@/interfaces/ipc";
 
 
 export default function Calculadora() {
-  const anios = useMemo(() => getAniosDisponibles(), [])
+  const [ipcData, setIpcData] = useState<IpcEntry[]>([])
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    fetchIpcData()
+      .then(setIpcData)
+      .catch(() => toast.error("No se pudieron cargar los datos del IPC. Intentá nuevamente más tarde."))
+      .finally(() => setCargando(false))
+  }, [])
+
+  const anios = useMemo(() => getAniosDisponibles(ipcData), [ipcData])
 
   const [monto, setMonto] = useState("")
   const [mesInicio, setMesInicio] = useState(0)
@@ -17,8 +30,8 @@ export default function Calculadora() {
   const resultado = useMemo(() => {
     const montoNumero = Number(monto)
     if (!montoNumero || !mesInicio || !anioInicio || !mesFin || !anioFin) return null
-    return calcularInflacion({ monto: montoNumero, mesInicio, anioInicio, mesFin, anioFin })
-  }, [monto, mesInicio, anioInicio, mesFin, anioFin])
+    return calcularInflacion(ipcData, { monto: montoNumero, mesInicio, anioInicio, mesFin, anioFin })
+  }, [ipcData, monto, mesInicio, anioInicio, mesFin, anioFin])
 
   return (
     <div>
@@ -34,7 +47,11 @@ export default function Calculadora() {
           en base al Índice de Precios al Consumidor (IPC) de San Salvador de Jujuy.</p>
        </div>
 
-       <div className='grid grid-cols-1 md:grid-cols-2 gap-8 bg-teal-500/20 w-full rounded-2xl p-8'>
+       {cargando && (
+         <p className='mb-4 text-sm text-muted-foreground'>Cargando datos del IPC...</p>
+       )}
+
+       <div className='grid grid-cols-1 md:grid-cols-2 gap-10 bg-teal-500/20 w-full rounded-2xl px-10 py-14'>
         <Ingreso
           monto={monto}
           onMontoChange={setMonto}
@@ -47,6 +64,7 @@ export default function Calculadora() {
           onMesFinChange={setMesFin}
           onAnioFinChange={setAnioFin}
           anios={anios}
+          ipcData={ipcData}
         />
         <Egreso resultado={resultado} />
         </div>

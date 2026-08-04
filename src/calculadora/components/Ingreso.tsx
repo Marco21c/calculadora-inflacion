@@ -1,5 +1,7 @@
 import { ChevronsUpDown } from "lucide-react"
-import { MESES } from "../data/ipc"
+import { useMemo } from "react"
+import { MESES, getMesesDisponibles } from "../data/ipc"
+import type { IpcEntry } from "@/interfaces/ipc"
 
 interface Opcion {
   value: number
@@ -13,6 +15,7 @@ function CampoSelect({
   opciones,
   placeholder,
   ariaLabel,
+  deshabilitadas = [],
 }: {
   id: string
   value: number
@@ -20,6 +23,7 @@ function CampoSelect({
   opciones: Opcion[]
   placeholder: string
   ariaLabel: string
+  deshabilitadas?: number[]
 }) {
   return (
     <div className="relative flex-1">
@@ -28,13 +32,13 @@ function CampoSelect({
         value={value || ""}
         onChange={(e) => onChange(Number(e.target.value))}
         aria-label={ariaLabel}
-        className="h-10 w-full appearance-none rounded-md border border-input bg-white px-3 pr-8 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="h-10 w-full appearance-none rounded-md border border-input bg-white px-3 pr-8 text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <option value="" disabled>
           {placeholder}
         </option>
         {opciones.map((opcion) => (
-          <option key={opcion.value} value={opcion.value}>
+          <option key={opcion.value} value={opcion.value} disabled={deshabilitadas.includes(opcion.value)}>
             {opcion.label}
           </option>
         ))}
@@ -56,6 +60,7 @@ interface IngresoProps {
   onMesFinChange: (value: number) => void
   onAnioFinChange: (value: number) => void
   anios: number[]
+  ipcData: IpcEntry[]
 }
 
 export default function Ingreso({
@@ -70,14 +75,46 @@ export default function Ingreso({
   onMesFinChange,
   onAnioFinChange,
   anios,
+  ipcData,
 }: IngresoProps) {
   const opcionesMeses: Opcion[] = MESES.map((mes, i) => ({ value: i + 1, label: mes }))
   const opcionesAnios: Opcion[] = anios.map((anio) => ({ value: anio, label: String(anio) }))
 
+  const aniosDeshabilitadosInicio = useMemo(
+    () => (anioFin ? opcionesAnios.map((o) => o.value).filter((anio) => anio > anioFin) : []),
+    [anioFin, opcionesAnios],
+  )
+  const aniosDeshabilitadosFin = useMemo(
+    () => (anioInicio ? opcionesAnios.map((o) => o.value).filter((anio) => anio < anioInicio) : []),
+    [anioInicio, opcionesAnios],
+  )
+
+  const mesesDeshabilitadosInicio = useMemo(() => {
+    const disponibles = anioInicio ? getMesesDisponibles(ipcData, anioInicio) : []
+    return opcionesMeses
+      .map((o) => o.value)
+      .filter((mes) => {
+        if (anioInicio && !disponibles.includes(mes)) return true
+        if (anioInicio && anioFin && anioInicio === anioFin && mesFin && mes > mesFin) return true
+        return false
+      })
+  }, [ipcData, anioInicio, anioFin, mesFin, opcionesMeses])
+
+  const mesesDeshabilitadosFin = useMemo(() => {
+    const disponibles = anioFin ? getMesesDisponibles(ipcData, anioFin) : []
+    return opcionesMeses
+      .map((o) => o.value)
+      .filter((mes) => {
+        if (anioFin && !disponibles.includes(mes)) return true
+        if (anioInicio && anioFin && anioInicio === anioFin && mesInicio && mes < mesInicio) return true
+        return false
+      })
+  }, [ipcData, anioFin, anioInicio, mesInicio, opcionesMeses])
+
   return (
     <form className="flex h-full w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <label htmlFor="monto" className="text-sm font-semibold text-foreground">
+        <label htmlFor="monto" className="font-semibold text-foreground">
           Ingresar el monto a calcular:
         </label>
         <input
@@ -85,7 +122,7 @@ export default function Ingreso({
           type="number"
           min="0"
           step="0.01"
-          placeholder="0,00"
+          placeholder="Ingresar Cantidad ($) "
           value={monto}
           onChange={(e) => onMontoChange(e.target.value)}
           className="w-full max-w-md border-0 border-b-2 border-foreground/50 bg-white px-3 py-2 text-lg font-semibold text-foreground outline-none focus-visible:border-ring"
@@ -93,7 +130,7 @@ export default function Ingreso({
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold text-foreground">Comienzo:</span>
+        <span className=" font-semibold text-foreground">Comienzo:</span>
         <div className="flex max-w-md gap-3">
           <CampoSelect
             id="mesInicio"
@@ -102,6 +139,7 @@ export default function Ingreso({
             opciones={opcionesMeses}
             placeholder="Mes"
             ariaLabel="Mes de comienzo"
+            deshabilitadas={mesesDeshabilitadosInicio}
           />
           <CampoSelect
             id="anioInicio"
@@ -110,12 +148,13 @@ export default function Ingreso({
             opciones={opcionesAnios}
             placeholder="Año"
             ariaLabel="Año de comienzo"
+            deshabilitadas={aniosDeshabilitadosInicio}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold text-foreground">Final:</span>
+        <span className=" font-semibold text-foreground">Final:</span>
         <div className="flex max-w-md gap-3">
           <CampoSelect
             id="mesFin"
@@ -124,6 +163,7 @@ export default function Ingreso({
             opciones={opcionesMeses}
             placeholder="Mes"
             ariaLabel="Mes final"
+            deshabilitadas={mesesDeshabilitadosFin}
           />
           <CampoSelect
             id="anioFin"
@@ -132,6 +172,7 @@ export default function Ingreso({
             opciones={opcionesAnios}
             placeholder="Año"
             ariaLabel="Año final"
+            deshabilitadas={aniosDeshabilitadosFin}
           />
         </div>
       </div>
