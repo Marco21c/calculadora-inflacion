@@ -1,17 +1,29 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { MESES } from "@/calculadora/data/ipc"
+import type { IpcEntry } from "@/interfaces/ipc"
 import { guardarEntrada } from "../data/ipcAdmin"
 
 interface FormularioIpcProps {
+  entradas: IpcEntry[]
   onGuardado: () => void
 }
 
 const inputClassName =
   "h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
-export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
+function calcularSiguientePeriodo(entradas: IpcEntry[]): { mes: number; anio: number } | null {
+  if (entradas.length === 0) return null
+  const ultimo = entradas.reduce((max, entrada) =>
+    entrada.anio > max.anio || (entrada.anio === max.anio && entrada.mes > max.mes) ? entrada : max,
+  )
+  return ultimo.mes === 12 ? { mes: 1, anio: ultimo.anio + 1 } : { mes: ultimo.mes + 1, anio: ultimo.anio }
+}
+
+export default function FormularioIpc({ entradas, onGuardado }: FormularioIpcProps) {
+  const siguientePeriodo = useMemo(() => calcularSiguientePeriodo(entradas), [entradas])
+
   const [mes, setMes] = useState("")
   const [anio, setAnio] = useState("")
   const [ipc, setIpc] = useState("")
@@ -24,8 +36,8 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
   async function handleSubmit(evento: React.FormEvent) {
     evento.preventDefault()
 
-    const mesNumero = Number(mes)
-    const anioNumero = Number(anio)
+    const mesNumero = siguientePeriodo?.mes ?? Number(mes)
+    const anioNumero = siguientePeriodo?.anio ?? Number(anio)
     const ipcNumero = Number(ipc)
     const inflacionMensualNumero = Number(inflacionMensual)
 
@@ -74,111 +86,117 @@ export default function FormularioIpc({ onGuardado }: FormularioIpcProps) {
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <label htmlFor="mes" className="text-sm font-semibold text-foreground">
-            Mes
+            Fecha
           </label>
-          <select id="mes" value={mes} onChange={(e) => setMes(e.target.value)} className={inputClassName}>
-            <option value="" disabled>
-              Mes
-            </option>
-            {MESES.map((nombre, i) => (
-              <option key={nombre} value={i + 1}>
-                {nombre}
-              </option>
-            ))}
-          </select>
+          {siguientePeriodo ? (
+            <div className={`${inputClassName} flex items-center bg-muted/40 text-muted-foreground`}>
+              {MESES[siguientePeriodo.mes - 1]} {siguientePeriodo.anio}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <select id="mes" value={mes} onChange={(e) => setMes(e.target.value)} className={inputClassName}>
+                <option value="" disabled>
+                  Mes
+                </option>
+                {MESES.map((nombre, i) => (
+                  <option key={nombre} value={i + 1}>
+                    {nombre}
+                  </option>
+                ))}
+              </select>
+              <input
+                id="anio"
+                type="number"
+                value={anio}
+                onChange={(e) => setAnio(e.target.value)}
+                placeholder="2026"
+                className={inputClassName}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="anio" className="text-sm font-semibold text-foreground">
-            Año
+          <label htmlFor="ipc" className="text-sm font-semibold text-foreground">
+            IPC
           </label>
           <input
-            id="anio"
+            id="ipc"
             type="number"
-            value={anio}
-            onChange={(e) => setAnio(e.target.value)}
-            placeholder="2026"
+            step="0.01"
+            value={ipc}
+            onChange={(e) => setIpc(e.target.value)}
+            placeholder="105.20"
             className={inputClassName}
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="ipc" className="text-sm font-semibold text-foreground">
-          IPC
-        </label>
-        <input
-          id="ipc"
-          type="number"
-          step="0.01"
-          value={ipc}
-          onChange={(e) => setIpc(e.target.value)}
-          placeholder="105.20"
-          className={inputClassName}
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="inflacionMensual" className="text-sm font-semibold text-foreground">
+            Inflación mensual (%)
+          </label>
+          <input
+            id="inflacionMensual"
+            type="number"
+            step="0.01"
+            value={inflacionMensual}
+            onChange={(e) => setInflacionMensual(e.target.value)}
+            placeholder="2.10"
+            className={inputClassName}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="inflacionInteranual" className="text-sm font-semibold text-foreground">
+            Inflación interanual (%) — opcional
+          </label>
+          <input
+            id="inflacionInteranual"
+            type="number"
+            step="0.01"
+            value={inflacionInteranual}
+            onChange={(e) => setInflacionInteranual(e.target.value)}
+            placeholder="85.40"
+            className={inputClassName}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="inflacionMensual" className="text-sm font-semibold text-foreground">
-          Inflación mensual (%)
-        </label>
-        <input
-          id="inflacionMensual"
-          type="number"
-          step="0.01"
-          value={inflacionMensual}
-          onChange={(e) => setInflacionMensual(e.target.value)}
-          placeholder="2.10"
-          className={inputClassName}
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="promedioAnualIpc" className="text-sm font-semibold text-foreground">
+            Promedio anual IPC — opcional
+          </label>
+          <input
+            id="promedioAnualIpc"
+            type="number"
+            step="0.01"
+            value={promedioAnualIpc}
+            onChange={(e) => setPromedioAnualIpc(e.target.value)}
+            placeholder="98.30"
+            className={inputClassName}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="variacionInteranualPromedio" className="text-sm font-semibold text-foreground">
+            Variación interanual promedio (%) — opcional
+          </label>
+          <input
+            id="variacionInteranualPromedio"
+            type="number"
+            step="0.01"
+            value={variacionInteranualPromedio}
+            onChange={(e) => setVariacionInteranualPromedio(e.target.value)}
+            placeholder="78.20"
+            className={inputClassName}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="inflacionInteranual" className="text-sm font-semibold text-foreground">
-          Inflación interanual (%) — opcional
-        </label>
-        <input
-          id="inflacionInteranual"
-          type="number"
-          step="0.01"
-          value={inflacionInteranual}
-          onChange={(e) => setInflacionInteranual(e.target.value)}
-          placeholder="85.40"
-          className={inputClassName}
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="promedioAnualIpc" className="text-sm font-semibold text-foreground">
-          Promedio anual IPC — opcional
-        </label>
-        <input
-          id="promedioAnualIpc"
-          type="number"
-          step="0.01"
-          value={promedioAnualIpc}
-          onChange={(e) => setPromedioAnualIpc(e.target.value)}
-          placeholder="98.30"
-          className={inputClassName}
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="variacionInteranualPromedio" className="text-sm font-semibold text-foreground">
-          Variación interanual promedio (%) — opcional
-        </label>
-        <input
-          id="variacionInteranualPromedio"
-          type="number"
-          step="0.01"
-          value={variacionInteranualPromedio}
-          onChange={(e) => setVariacionInteranualPromedio(e.target.value)}
-          placeholder="78.20"
-          className={inputClassName}
-        />
-      </div>
-
-      <Button type="submit" disabled={guardando} className="w-fit">
+      <Button type="submit" disabled={guardando} >
         {guardando ? "Guardando..." : "Guardar período"}
       </Button>
     </form>
