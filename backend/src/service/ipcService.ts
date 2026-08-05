@@ -2,7 +2,7 @@ import { prisma } from "../db/prisma.js"
 import type { IpcEntry } from "../interfaces/ipc.js"
 
 export function getIpcEntries(): Promise<IpcEntry[]> {
-  return prisma.ipcEntry.findMany({ orderBy: [{ anio: "asc" }, { mes: "desc" }] })
+  return prisma.ipcEntry.findMany({ orderBy: [{ anio: "asc" }, { mes: "asc" }] })
 }
 
 export function saveIpcEntries(entrada: IpcEntry): Promise<IpcEntry> {

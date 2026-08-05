@@ -4,9 +4,12 @@ import { Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import ConfirmDialog from "@/components/ConfirmDialog"
 import { MESES, formatoPorcentaje } from "@/calculadora/data/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
 import { useEliminarEntradaMutation, useGuardarEntradasMasivoMutation } from "../hooks/ipcEntriesQueries"
+import DetalleEntradaIpc from "./DetalleEntradaIpc"
+import { calcularSiguientePeriodo } from "../utils/calcularSiguientePeriodo"
 
 interface TablaIpcProps {
   entradas: IpcEntry[]
@@ -16,18 +19,51 @@ interface TablaIpcProps {
 
 const MESES_ABREVIADOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
-const inputClassName =
-  "text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+const inputClassName = "text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 
 type CampoRequerido = "ipc" | "inflacionMensual"
 type CampoOpcional = "inflacionInteranual" | "promedioAnualIpc" | "variacionInteranualPromedio"
+type ColumnaNavegable = CampoRequerido | CampoOpcional
+
+const COLUMNAS_NAVEGABLES: ColumnaNavegable[] = [
+  "ipc",
+  "inflacionMensual",
+  "inflacionInteranual",
+  "promedioAnualIpc",
+  "variacionInteranualPromedio",
+]
+
+function filaVacia(anio: number, mes: number): IpcEntry {
+  return {
+    anio,
+    mes,
+    ipc: 0,
+    inflacionMensual: 0,
+    inflacionInteranual: null,
+    promedioAnualIpc: null,
+    variacionInteranualPromedio: null,
+  }
+}
 
 function formatoOpcional(valor: number | null): string {
   return valor === null ? "-" : formatoPorcentaje(valor)
 }
 
+function parsearNumeroPegado(texto: string): number | null {
+  const limpio = texto.trim()
+  if (limpio === "") return null
+  const normalizado =
+    limpio.includes(",") && !limpio.includes(".")
+      ? limpio.replace(",", ".")
+      : limpio.replace(/\.(?=\d{3}(?:\D|$))/g, "")
+  const numero = Number(normalizado)
+  return Number.isNaN(numero) ? null : numero
+}
+
 export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }: TablaIpcProps) {
   const [filas, setFilas] = useState<IpcEntry[]>(entradas)
+  const [periodoAEliminar, setPeriodoAEliminar] = useState<IpcEntry | null>(null)
+  const [confirmarGuardado, setConfirmarGuardado] = useState(false)
   const eliminarMutation = useEliminarEntradaMutation()
   const guardarMasivoMutation = useGuardarEntradasMasivoMutation()
 
@@ -36,6 +72,21 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
   }, [entradas])
 
   const huboCambios = useMemo(() => JSON.stringify(filas) !== JSON.stringify(entradas), [filas, entradas])
+
+  const filasModificadas = useMemo(
+    () =>
+      filas.filter((fila) => {
+        const original = entradas.find((entrada) => entrada.anio === fila.anio && entrada.mes === fila.mes)
+        return JSON.stringify(fila) !== JSON.stringify(original)
+      }),
+    [filas, entradas],
+  )
+
+  const ultimaFilaEsNueva = useMemo(() => {
+    const ultima = filas[filas.length - 1]
+    if (!ultima) return false
+    return !entradas.some((entrada) => entrada.anio === ultima.anio && entrada.mes === ultima.mes)
+  }, [filas, entradas])
 
   function actualizarCampoRequerido(anio: number, mes: number, campo: CampoRequerido, valor: string) {
     const numero = Number(valor)
@@ -53,19 +104,108 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
     )
   }
 
-  function handleEliminar(anio: number, mes: number) {
+  function handlePegado(evento: React.ClipboardEvent, filaIndex: number, columnaId: ColumnaNavegable) {
+    const texto = evento.clipboardData.getData("text")
+    if (!texto.includes("\t") && !texto.includes("\n")) return // pegado de una sola celda: comportamiento normal
+
+    evento.preventDefault()
+
+    const filasPegadas = texto
+      .replace(/\r/g, "")
+      .split("\n")
+      .filter((linea, indice, arreglo) => !(indice === arreglo.length - 1 && linea === ""))
+    const columnaInicioIndex = COLUMNAS_NAVEGABLES.indexOf(columnaId)
+
+    setFilas((prev) =>
+      prev.map((fila, indice) => {
+        const offsetFila = indice - filaIndex
+        if (offsetFila < 0 || offsetFila >= filasPegadas.length) return fila
+
+        const valoresColumnas = filasPegadas[offsetFila].split("\t")
+        let filaActualizada = fila
+
+        valoresColumnas.forEach((valorTexto, offsetColumna) => {
+          const columnaActual = COLUMNAS_NAVEGABLES[columnaInicioIndex + offsetColumna]
+          if (!columnaActual) return
+
+          const numero = parsearNumeroPegado(valorTexto)
+          if (columnaActual === "ipc" || columnaActual === "inflacionMensual") {
+            if (numero !== null) filaActualizada = { ...filaActualizada, [columnaActual]: numero }
+          } else {
+            filaActualizada = { ...filaActualizada, [columnaActual]: numero }
+          }
+        })
+
+        return filaActualizada
+      }),
+    )
+  }
+
+  function handleAgregarFila() {
+    const siguiente = calcularSiguientePeriodo(filas)
+    if (!siguiente) {
+      toast.error("No se pudo calcular el próximo período.")
+      return
+    }
+    setFilas((prev) => [...prev, filaVacia(siguiente.anio, siguiente.mes)])
+  }
+
+  function handleEliminarUltimaFila() {
+    if (!ultimaFilaEsNueva) return
+    setFilas((prev) => prev.slice(0, -1))
+  }
+
+  function handleTeclado(evento: React.KeyboardEvent<HTMLInputElement>, filaIndex: number, columnaId: ColumnaNavegable) {
+    const esVertical = evento.key === "ArrowUp" || evento.key === "ArrowDown"
+    const esHorizontal = evento.key === "ArrowLeft" || evento.key === "ArrowRight"
+    if (!esVertical && !esHorizontal) return
+
+    // Las flechas arriba/abajo incrementan o decrementan un <input type="number"> de forma nativa
+    // aunque el stepper esté oculto, así que hay que frenarlas siempre para que solo naveguen.
+    if (esVertical) evento.preventDefault()
+
+    const colIndex = COLUMNAS_NAVEGABLES.indexOf(columnaId)
+    const input = evento.currentTarget
+
+    let destinoFila = filaIndex
+    let destinoCol = colIndex
+    if (evento.key === "ArrowUp") destinoFila -= 1
+    if (evento.key === "ArrowDown") destinoFila += 1
+    if (evento.key === "ArrowLeft") destinoCol -= 1
+    if (evento.key === "ArrowRight") destinoCol += 1
+
+    if (destinoFila < 0 || destinoCol < 0 || destinoCol >= COLUMNAS_NAVEGABLES.length) return
+
+    const selector = `input[data-row="${destinoFila}"][data-col="${COLUMNAS_NAVEGABLES[destinoCol]}"]`
+    const siguienteInput = input.closest("table")?.querySelector<HTMLInputElement>(selector)
+    if (!siguienteInput) return
+
+    if (esHorizontal) evento.preventDefault()
+    siguienteInput.focus()
+    siguienteInput.select()
+  }
+
+  function confirmarEliminar() {
+    if (!periodoAEliminar) return
+    const { anio, mes } = periodoAEliminar
     eliminarMutation.mutate(
       { anio, mes },
       {
-        onSuccess: () => toast.success(`Período ${MESES[mes - 1]} ${anio} eliminado.`),
+        onSuccess: () => {
+          toast.success(`Período ${MESES[mes - 1]} ${anio} eliminado.`)
+          setPeriodoAEliminar(null)
+        },
         onError: () => toast.error("No se pudo eliminar el período. Intentá nuevamente."),
       },
     )
   }
 
-  function handleGuardarCambios() {
+  function confirmarGuardarCambios() {
     guardarMasivoMutation.mutate(filas, {
-      onSuccess: () => toast.success("Cambios guardados."),
+      onSuccess: () => {
+        toast.success("Cambios guardados.")
+        setConfirmarGuardado(false)
+      },
       onError: () => toast.error("No se pudieron guardar los cambios. Intentá nuevamente."),
     })
   }
@@ -89,13 +229,17 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               step="0.01"
               value={row.original.ipc}
               onChange={(e) => actualizarCampoRequerido(row.original.anio, row.original.mes, "ipc", e.target.value)}
+              onKeyDown={(e) => handleTeclado(e, row.index, "ipc")}
+              onPaste={(e) => handlePegado(e, row.index, "ipc")}
+              data-row={row.index}
+              data-col="ipc"
               className={inputClassName}
             />
           ),
       },
       {
         id: "inflacionMensual",
-        header: "Inflación mensual (%)",
+        header: "Inflación mensual",
         cell: ({ row }) =>
           soloLectura ? (
             formatoPorcentaje(row.original.inflacionMensual)
@@ -107,6 +251,10 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               onChange={(e) =>
                 actualizarCampoRequerido(row.original.anio, row.original.mes, "inflacionMensual", e.target.value)
               }
+              onKeyDown={(e) => handleTeclado(e, row.index, "inflacionMensual")}
+              onPaste={(e) => handlePegado(e, row.index, "inflacionMensual")}
+              data-row={row.index}
+              data-col="inflacionMensual"
               className={inputClassName}
             />
           ),
@@ -125,6 +273,10 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               onChange={(e) =>
                 actualizarCampoOpcional(row.original.anio, row.original.mes, "inflacionInteranual", e.target.value)
               }
+              onKeyDown={(e) => handleTeclado(e, row.index, "inflacionInteranual")}
+              onPaste={(e) => handlePegado(e, row.index, "inflacionInteranual")}
+              data-row={row.index}
+              data-col="inflacionInteranual"
               className={inputClassName}
             />
           ),
@@ -143,6 +295,9 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               onChange={(e) =>
                 actualizarCampoOpcional(row.original.anio, row.original.mes, "promedioAnualIpc", e.target.value)
               }
+              onKeyDown={(e) => handleTeclado(e, row.index, "promedioAnualIpc")}
+              data-row={row.index}
+              data-col="promedioAnualIpc"
               className={inputClassName}
             />
           ),
@@ -166,6 +321,9 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
                   e.target.value,
                 )
               }
+              onKeyDown={(e) => handleTeclado(e, row.index, "variacionInteranualPromedio")}
+              data-row={row.index}
+              data-col="variacionInteranualPromedio"
               className={inputClassName}
             />
           ),
@@ -182,7 +340,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         cell: ({ row }) => (
           <button
             type="button"
-            onClick={() => handleEliminar(row.original.anio, row.original.mes)}
+            onClick={() => setPeriodoAEliminar(row.original)}
             aria-label="Eliminar período"
             title="Eliminar período"
             className="text-red-600 hover:text-red-700"
@@ -192,7 +350,6 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         ),
       },
     ]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [soloLectura])
 
   const table = useReactTable({
@@ -208,6 +365,31 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
 
   return (
     <div className="flex flex-col gap-3">
+      {!soloLectura && (
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={handleAgregarFila} className="w-fit">
+            Agregar nueva fila
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleEliminarUltimaFila}
+            disabled={!ultimaFilaEsNueva}
+            className="w-fit"
+          >
+            Eliminar última fila
+          </Button>
+          <Button
+          type="button"
+          onClick={() => setConfirmarGuardado(true)}
+          disabled={!huboCambios || guardarMasivoMutation.isPending}
+          className="w-fit"
+        >
+          {guardarMasivoMutation.isPending ? "Guardando..." : "Guardar cambios"}
+        </Button>
+        </div>
+      )}
+
       <div className={alturaMaxima ? "overflow-y-auto" : undefined} style={alturaMaxima ? { maxHeight: alturaMaxima } : undefined}>
         <Table>
          <TableHeader className="bg-gray-300/80">
@@ -233,16 +415,42 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         </Table>
       </div>
 
-      {!soloLectura && (
-        <Button
-          type="button"
-          onClick={handleGuardarCambios}
-          disabled={!huboCambios || guardarMasivoMutation.isPending}
-          className="w-fit"
-        >
-          {guardarMasivoMutation.isPending ? "Guardando..." : "Guardar cambios"}
-        </Button>
-      )}
+      
+
+      <ConfirmDialog
+        open={periodoAEliminar !== null}
+        onOpenChange={(open) => !open && setPeriodoAEliminar(null)}
+        title="¿Eliminar este período?"
+        description={
+          periodoAEliminar
+            ? `Se va a eliminar ${MESES[periodoAEliminar.mes - 1]} ${periodoAEliminar.anio}. Esta acción no se puede deshacer.`
+            : undefined
+        }
+        detalle={periodoAEliminar && <DetalleEntradaIpc entrada={periodoAEliminar} />}
+        confirmLabel="Eliminar"
+        variant="destructive"
+        loading={eliminarMutation.isPending}
+        onConfirm={confirmarEliminar}
+      />
+
+      <ConfirmDialog
+        open={confirmarGuardado}
+        onOpenChange={setConfirmarGuardado}
+        title="¿Guardar los cambios?"
+        description={`Se van a aplicar las modificaciones en ${filasModificadas.length} período${filasModificadas.length === 1 ? "" : "s"}.`}
+        detalle={
+          <ul className="list-disc space-y-1 pl-4">
+            {filasModificadas.map((fila) => (
+              <li key={`${fila.anio}-${fila.mes}`}>
+                {MESES[fila.mes - 1]} {fila.anio}
+              </li>
+            ))}
+          </ul>
+        }
+        confirmLabel="Guardar"
+        loading={guardarMasivoMutation.isPending}
+        onConfirm={confirmarGuardarCambios}
+      />
     </div>
   )
 }

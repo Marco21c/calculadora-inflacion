@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import ConfirmDialog from "@/components/ConfirmDialog"
 import { MESES } from "@/calculadora/data/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
 import { useGuardarEntradaMutation } from "../hooks/ipcEntriesQueries"
+import DetalleEntradaIpc from "./DetalleEntradaIpc"
+import { calcularSiguientePeriodo } from "../utils/calcularSiguientePeriodo"
 
 interface FormularioIpcProps {
   entradas: IpcEntry[]
@@ -12,17 +15,10 @@ interface FormularioIpcProps {
 const inputClassName =
   "h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
-function calcularSiguientePeriodo(entradas: IpcEntry[]): { mes: number; anio: number } | null {
-  if (entradas.length === 0) return null
-  const ultimo = entradas.reduce((max, entrada) =>
-    entrada.anio > max.anio || (entrada.anio === max.anio && entrada.mes > max.mes) ? entrada : max,
-  )
-  return ultimo.mes === 12 ? { mes: 1, anio: ultimo.anio + 1 } : { mes: ultimo.mes + 1, anio: ultimo.anio }
-}
-
 export default function FormularioIpc({ entradas }: FormularioIpcProps) {
   const siguientePeriodo = useMemo(() => calcularSiguientePeriodo(entradas), [entradas])
   const guardarMutation = useGuardarEntradaMutation()
+  const [pendiente, setPendiente] = useState<IpcEntry | null>(null)
 
   const [mes, setMes] = useState("")
   const [anio, setAnio] = useState("")
@@ -46,31 +42,34 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
       return
     }
 
-    guardarMutation.mutate(
-      {
-        mes: mesNumero,
-        anio: anioNumero,
-        ipc: ipcNumero,
-        inflacionMensual: inflacionMensualNumero,
-        inflacionInteranual: inflacionInteranual.trim() === "" ? null : Number(inflacionInteranual),
-        promedioAnualIpc: promedioAnualIpc.trim() === "" ? null : Number(promedioAnualIpc),
-        variacionInteranualPromedio:
-          variacionInteranualPromedio.trim() === "" ? null : Number(variacionInteranualPromedio),
+    setPendiente({
+      mes: mesNumero,
+      anio: anioNumero,
+      ipc: ipcNumero,
+      inflacionMensual: inflacionMensualNumero,
+      inflacionInteranual: inflacionInteranual.trim() === "" ? null : Number(inflacionInteranual),
+      promedioAnualIpc: promedioAnualIpc.trim() === "" ? null : Number(promedioAnualIpc),
+      variacionInteranualPromedio:
+        variacionInteranualPromedio.trim() === "" ? null : Number(variacionInteranualPromedio),
+    })
+  }
+
+  function confirmarGuardado() {
+    if (!pendiente) return
+    guardarMutation.mutate(pendiente, {
+      onSuccess: () => {
+        toast.success(`Período ${MESES[pendiente.mes - 1]} ${pendiente.anio} guardado.`)
+        setMes("")
+        setAnio("")
+        setIpc("")
+        setInflacionMensual("")
+        setInflacionInteranual("")
+        setPromedioAnualIpc("")
+        setVariacionInteranualPromedio("")
+        setPendiente(null)
       },
-      {
-        onSuccess: () => {
-          toast.success(`Período ${MESES[mesNumero - 1]} ${anioNumero} guardado.`)
-          setMes("")
-          setAnio("")
-          setIpc("")
-          setInflacionMensual("")
-          setInflacionInteranual("")
-          setPromedioAnualIpc("")
-          setVariacionInteranualPromedio("")
-        },
-        onError: () => toast.error("No se pudo guardar el período. Intentá nuevamente."),
-      },
-    )
+      onError: () => toast.error("No se pudo guardar el período. Intentá nuevamente."),
+    })
   }
 
   return (
@@ -191,6 +190,19 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
       <Button type="submit" disabled={guardarMutation.isPending}>
         {guardarMutation.isPending ? "Guardando..." : "Guardar período"}
       </Button>
+
+      <ConfirmDialog
+        open={pendiente !== null}
+        onOpenChange={(open) => !open && setPendiente(null)}
+        title="¿Guardar este período?"
+        description={
+          pendiente ? `Se va a guardar ${MESES[pendiente.mes - 1]} ${pendiente.anio} con los datos ingresados.` : undefined
+        }
+        detalle={pendiente && <DetalleEntradaIpc entrada={pendiente} />}
+        confirmLabel="Guardar"
+        loading={guardarMutation.isPending}
+        onConfirm={confirmarGuardado}
+      />
     </form>
   )
 }
