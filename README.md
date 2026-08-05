@@ -23,7 +23,7 @@ calculadora-inflacion/
 ### Backend (`backend/`)
 
 - Node + Express + TypeScript, expuesto también como función serverless para Vercel (`backend/api/index.ts`).
-- Persistencia con Prisma sobre **SQLite** (`backend/data/ipc.db`), usando el driver `better-sqlite3`.
+- Persistencia con Prisma sobre **PostgreSQL (Supabase)**, usando el driver `@prisma/adapter-pg`.
 - Endpoints (montados bajo `/api/ipc-entries`):
   - `GET /api/ipc-entries` — lista todas las entradas de IPC.
   - `POST /api/ipc-entries` — crea o actualiza una entrada (upsert por año/mes).
@@ -44,6 +44,14 @@ Instalar dependencias una sola vez desde la raíz (resuelve ambos workspaces):
 npm install
 ```
 
+Copiar `backend/.env.example` a `backend/.env` y completar `DATABASE_URL`/`DIRECT_URL` con los datos de conexión del proyecto de Supabase (Project Settings → Database → Connection string). La primera vez, crear las tablas y cargar los datos:
+
+```bash
+cd backend
+npx prisma migrate dev --name init   # crea las tablas en Supabase
+npm run db:seed                      # carga backend/prisma/seed-data.json
+```
+
 Levantar cada paquete en una terminal distinta:
 
 ```bash
@@ -55,13 +63,15 @@ El frontend apunta por defecto a `http://localhost:3001` como API (ver `VITE_API
 
 ## Variables de entorno
 
-| Paquete  | Variable         | Uso                                                              | Default local           |
-| -------- | ---------------- | ----------------------------------------------------------------- | ------------------------ |
-| backend  | `FRONTEND_ORIGIN` | Origen permitido por CORS                                        | `http://localhost:5173` |
-| backend  | `PORT`            | Puerto del servidor Express (solo fuera de Vercel)                | `3001`                  |
-| frontend | `VITE_API_URL`    | URL base de la API que consume la calculadora y el panel de carga | `http://localhost:3001` |
+| Paquete  | Variable          | Uso                                                                 | Default local            |
+| -------- | ----------------- | -------------------------------------------------------------------- | ------------------------- |
+| backend  | `DATABASE_URL`     | Conexión pooled a Supabase (puerto 6543) — la usa la app en runtime | —                         |
+| backend  | `DIRECT_URL`       | Conexión directa a Supabase (puerto 5432) — la usa Prisma Migrate   | —                         |
+| backend  | `FRONTEND_ORIGIN`  | Origen permitido por CORS                                           | `http://localhost:5173` |
+| backend  | `PORT`             | Puerto del servidor Express (solo fuera de Vercel)                   | `3001`                   |
+| frontend | `VITE_API_URL`     | URL base de la API que consume la calculadora y el panel de carga    | `http://localhost:3001` |
 
-En producción (Vercel) **ambas variables deben configurarse explícitamente** en cada proyecto: `FRONTEND_ORIGIN` en el backend con la URL pública del frontend, y `VITE_API_URL` en el frontend con la URL pública del backend. Sin esto, CORS bloquea las requests o el frontend sigue apuntando a `localhost`.
+En producción (Vercel) **todas deben configurarse explícitamente** en cada proyecto (`DATABASE_URL`/`DIRECT_URL` y `FRONTEND_ORIGIN` en el backend, `VITE_API_URL` en el frontend). Sin `FRONTEND_ORIGIN` correcto, CORS bloquea las requests; sin `VITE_API_URL`, el frontend sigue apuntando a `localhost`.
 
 ## Build
 
@@ -74,7 +84,4 @@ npm run build:backend
 
 Frontend y backend se despliegan como dos proyectos de Vercel independientes (cada uno con su propio `vercel.json`, con "Root Directory" apuntando a `frontend/` y `backend/` respectivamente).
 
-Notas sobre el backend en Vercel:
-
-- El filesystem de la función es de solo lectura salvo `/tmp`. La base `data/ipc.db` se incluye en el bundle de la función (`vercel.json` → `functions.api/index.ts.includeFiles`) y, en el primer arranque de cada instancia, se copia a `/tmp` para poder abrirse en modo lectura-escritura.
-- Por ser instancias serverless efímeras, los datos cargados desde el panel de administración **en producción no persisten de forma confiable** entre despliegues ni se comparten entre instancias. Para uso esporádico alcanza; si el panel se usa con frecuencia en producción, conviene migrar a una base con estado real (por ejemplo, Turso/libSQL compatible con SQLite, o Postgres) o alojar el backend en un host con disco persistente.
+El backend usa Postgres (Supabase) en vez de un archivo local, así que no depende del filesystem de la función ni de instancias efímeras: las escrituras del panel de administración persisten igual que cualquier base hosteada. Solo hace falta configurar `DATABASE_URL`/`DIRECT_URL` como variables de entorno del proyecto backend en Vercel (mismos valores que en `.env` local) y correr la migración inicial (`npx prisma migrate deploy`) contra esa base antes del primer deploy.

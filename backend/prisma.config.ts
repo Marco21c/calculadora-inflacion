@@ -1,4 +1,3 @@
-import path from "node:path"
 import { defineConfig } from "prisma/config"
 
 export default defineConfig({
@@ -6,7 +5,9 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // Conexión directa (no pooled) que usa Prisma Migrate. En runtime la app
+  // usa DATABASE_URL (pooled) a través del adapter en src/db/prisma.ts.
   datasource: {
-    url: `file:${path.resolve(import.meta.dirname, "data/ipc.db")}`,
+    url: process.env.DIRECT_URL,
   },
 })
