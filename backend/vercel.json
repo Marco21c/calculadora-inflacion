@@ -4,5 +4,12 @@
       "source": "/api/(.*)",
       "destination": "/api/index"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": [
+        "data/ipc.db"
+      ]
+    }
+  }
 }
