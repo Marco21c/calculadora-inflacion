@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { MESES, formatoPorcentaje } from "@/calculadora/data/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
-import { eliminarEntrada, guardarEntradasMasivo } from "../data/ipcAdmin"
+import { useEliminarEntradaMutation, useGuardarEntradasMasivoMutation } from "../hooks/ipcEntriesQueries"
 
 interface TablaIpcProps {
   entradas: IpcEntry[]
-  onActualizado: () => void
   soloLectura?: boolean
   alturaMaxima?: number
 }
@@ -27,9 +26,10 @@ function formatoOpcional(valor: number | null): string {
   return valor === null ? "-" : formatoPorcentaje(valor)
 }
 
-export default function TablaIpc({ entradas, onActualizado, soloLectura = false, alturaMaxima }: TablaIpcProps) {
+export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }: TablaIpcProps) {
   const [filas, setFilas] = useState<IpcEntry[]>(entradas)
-  const [guardando, setGuardando] = useState(false)
+  const eliminarMutation = useEliminarEntradaMutation()
+  const guardarMasivoMutation = useGuardarEntradasMasivoMutation()
 
   useEffect(() => {
     setFilas(entradas)
@@ -53,27 +53,21 @@ export default function TablaIpc({ entradas, onActualizado, soloLectura = false,
     )
   }
 
-  async function handleEliminar(anio: number, mes: number) {
-    try {
-      await eliminarEntrada(anio, mes)
-      toast.success(`Período ${MESES[mes - 1]} ${anio} eliminado.`)
-      onActualizado()
-    } catch {
-      toast.error("No se pudo eliminar el período. Intentá nuevamente.")
-    }
+  function handleEliminar(anio: number, mes: number) {
+    eliminarMutation.mutate(
+      { anio, mes },
+      {
+        onSuccess: () => toast.success(`Período ${MESES[mes - 1]} ${anio} eliminado.`),
+        onError: () => toast.error("No se pudo eliminar el período. Intentá nuevamente."),
+      },
+    )
   }
 
-  async function handleGuardarCambios() {
-    setGuardando(true)
-    try {
-      await guardarEntradasMasivo(filas)
-      toast.success("Cambios guardados.")
-      onActualizado()
-    } catch {
-      toast.error("No se pudieron guardar los cambios. Intentá nuevamente.")
-    } finally {
-      setGuardando(false)
-    }
+  function handleGuardarCambios() {
+    guardarMasivoMutation.mutate(filas, {
+      onSuccess: () => toast.success("Cambios guardados."),
+      onError: () => toast.error("No se pudieron guardar los cambios. Intentá nuevamente."),
+    })
   }
 
   const columnas = useMemo<ColumnDef<IpcEntry>[]>(() => {
@@ -240,8 +234,13 @@ export default function TablaIpc({ entradas, onActualizado, soloLectura = false,
       </div>
 
       {!soloLectura && (
-        <Button type="button" onClick={handleGuardarCambios} disabled={!huboCambios || guardando} className="w-fit">
-          {guardando ? "Guardando..." : "Guardar cambios"}
+        <Button
+          type="button"
+          onClick={handleGuardarCambios}
+          disabled={!huboCambios || guardarMasivoMutation.isPending}
+          className="w-fit"
+        >
+          {guardarMasivoMutation.isPending ? "Guardando..." : "Guardar cambios"}
         </Button>
       )}
     </div>

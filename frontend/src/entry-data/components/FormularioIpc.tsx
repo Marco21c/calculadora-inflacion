@@ -3,11 +3,10 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { MESES } from "@/calculadora/data/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
-import { guardarEntrada } from "../data/ipcAdmin"
+import { useGuardarEntradaMutation } from "../hooks/ipcEntriesQueries"
 
 interface FormularioIpcProps {
   entradas: IpcEntry[]
-  onGuardado: () => void
 }
 
 const inputClassName =
@@ -21,8 +20,9 @@ function calcularSiguientePeriodo(entradas: IpcEntry[]): { mes: number; anio: nu
   return ultimo.mes === 12 ? { mes: 1, anio: ultimo.anio + 1 } : { mes: ultimo.mes + 1, anio: ultimo.anio }
 }
 
-export default function FormularioIpc({ entradas, onGuardado }: FormularioIpcProps) {
+export default function FormularioIpc({ entradas }: FormularioIpcProps) {
   const siguientePeriodo = useMemo(() => calcularSiguientePeriodo(entradas), [entradas])
+  const guardarMutation = useGuardarEntradaMutation()
 
   const [mes, setMes] = useState("")
   const [anio, setAnio] = useState("")
@@ -31,9 +31,8 @@ export default function FormularioIpc({ entradas, onGuardado }: FormularioIpcPro
   const [inflacionInteranual, setInflacionInteranual] = useState("")
   const [promedioAnualIpc, setPromedioAnualIpc] = useState("")
   const [variacionInteranualPromedio, setVariacionInteranualPromedio] = useState("")
-  const [guardando, setGuardando] = useState(false)
 
-  async function handleSubmit(evento: React.FormEvent) {
+  function handleSubmit(evento: React.FormEvent) {
     evento.preventDefault()
 
     const mesNumero = siguientePeriodo?.mes ?? Number(mes)
@@ -41,21 +40,14 @@ export default function FormularioIpc({ entradas, onGuardado }: FormularioIpcPro
     const ipcNumero = Number(ipc)
     const inflacionMensualNumero = Number(inflacionMensual)
 
-    if (
-      !mesNumero ||
-      !anioNumero ||
-      ipc.trim() === "" ||
-      Number.isNaN(ipcNumero) ||
-      inflacionMensual.trim() === "" ||
-      Number.isNaN(inflacionMensualNumero)
-    ) {
+    if ( !mesNumero || !anioNumero || ipc.trim() === "" ||
+      Number.isNaN(ipcNumero) || inflacionMensual.trim() === "" || Number.isNaN(inflacionMensualNumero) ) {
       toast.error("Completá mes, año, IPC e inflación mensual.")
       return
     }
 
-    setGuardando(true)
-    try {
-      await guardarEntrada({
+    guardarMutation.mutate(
+      {
         mes: mesNumero,
         anio: anioNumero,
         ipc: ipcNumero,
@@ -64,21 +56,21 @@ export default function FormularioIpc({ entradas, onGuardado }: FormularioIpcPro
         promedioAnualIpc: promedioAnualIpc.trim() === "" ? null : Number(promedioAnualIpc),
         variacionInteranualPromedio:
           variacionInteranualPromedio.trim() === "" ? null : Number(variacionInteranualPromedio),
-      })
-      toast.success(`Período ${MESES[mesNumero - 1]} ${anioNumero} guardado.`)
-      setMes("")
-      setAnio("")
-      setIpc("")
-      setInflacionMensual("")
-      setInflacionInteranual("")
-      setPromedioAnualIpc("")
-      setVariacionInteranualPromedio("")
-      onGuardado()
-    } catch {
-      toast.error("No se pudo guardar el período. Intentá nuevamente.")
-    } finally {
-      setGuardando(false)
-    }
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Período ${MESES[mesNumero - 1]} ${anioNumero} guardado.`)
+          setMes("")
+          setAnio("")
+          setIpc("")
+          setInflacionMensual("")
+          setInflacionInteranual("")
+          setPromedioAnualIpc("")
+          setVariacionInteranualPromedio("")
+        },
+        onError: () => toast.error("No se pudo guardar el período. Intentá nuevamente."),
+      },
+    )
   }
 
   return (
@@ -196,8 +188,8 @@ export default function FormularioIpc({ entradas, onGuardado }: FormularioIpcPro
         </div>
       </div>
 
-      <Button type="submit" disabled={guardando} >
-        {guardando ? "Guardando..." : "Guardar período"}
+      <Button type="submit" disabled={guardarMutation.isPending}>
+        {guardarMutation.isPending ? "Guardando..." : "Guardar período"}
       </Button>
     </form>
   )

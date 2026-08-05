@@ -34,7 +34,7 @@ export default function Calculadora() {
   }, [ipcData, monto, mesInicio, anioInicio, mesFin, anioFin])
 
   return (
-    <div>
+    <div >
          <div className='flex flex-row justify-between items-center mb-2'  >
               <h1 className='text-3xl font-bold text-blue-900/80 '>
                CALCULADORA DE INFLACIÓN
