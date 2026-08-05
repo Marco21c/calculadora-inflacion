@@ -7,9 +7,7 @@
   ],
   "functions": {
     "api/index.ts": {
-      "includeFiles": [
-        "data/ipc.db"
-      ]
+      "includeFiles": "data/ipc.db"
     }
   }
 }
