@@ -1,4 +1,4 @@
-import { formatoPorcentaje } from "@/calculadora/data/ipc"
+import { formatoPorcentaje } from "@/calculadora/utils/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
 
 function Fila({ etiqueta, valor }: { etiqueta: string; valor: string }) {

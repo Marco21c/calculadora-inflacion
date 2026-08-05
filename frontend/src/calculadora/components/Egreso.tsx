@@ -1,4 +1,4 @@
-import { formatoMoneda, formatoPorcentaje} from "../data/ipc"
+import { formatoMoneda, formatoPorcentaje} from "../utils/ipc"
 import type { ResultadoInflacion } from "@/interfaces/ipc"
 
 interface EgresoProps {

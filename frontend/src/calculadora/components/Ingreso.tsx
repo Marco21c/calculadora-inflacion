@@ -1,6 +1,6 @@
 import { ChevronsUpDown } from "lucide-react"
 import { useMemo } from "react"
-import { MESES, getMesesDisponibles } from "../data/ipc"
+import { MESES, getMesesDisponibles } from "../utils/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
 
 interface Opcion {

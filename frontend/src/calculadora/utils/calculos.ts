@@ -1,5 +1,5 @@
 import type { IpcEntry, ResultadoInflacion } from "@/interfaces/ipc"
-import { MESES } from "../data/ipc"
+import { MESES } from "./ipc"
 
 export function calcularInflacion(
   ipcData: IpcEntry[],

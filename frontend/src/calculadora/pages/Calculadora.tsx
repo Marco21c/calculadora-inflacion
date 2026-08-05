@@ -1,25 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useMemo, useState } from "react";
 import Egreso from "../components/Egreso";
 import Ingreso from "../components/Ingreso";
 import logo from '@/assets/logo.png'
-import { fetchIpcData, getAniosDisponibles } from "../data/ipc";
+import {  getAniosDisponibles } from "../utils/ipc";
 import { calcularInflacion } from "../utils/calculos";
-import type { IpcEntry } from "@/interfaces/ipc";
+import { useIpcEntriesQuery } from "@/entry-data/hooks/ipcEntriesQueries";
 
 
 export default function Calculadora() {
-  const [ipcData, setIpcData] = useState<IpcEntry[]>([])
-  const [cargando, setCargando] = useState(true)
 
-  useEffect(() => {
-    fetchIpcData()
-      .then(setIpcData)
-      .catch(() => toast.error("No se pudieron cargar los datos del IPC. Intentá nuevamente más tarde."))
-      .finally(() => setCargando(false))
-  }, [])
 
-  const anios = useMemo(() => getAniosDisponibles(ipcData), [ipcData])
+  const { data = [], isPending: cargando, isError } = useIpcEntriesQuery()
+  
+  const anios = useMemo(() => getAniosDisponibles(data), [data])
 
   const [monto, setMonto] = useState("")
   const [mesInicio, setMesInicio] = useState(0)
@@ -30,8 +23,8 @@ export default function Calculadora() {
   const resultado = useMemo(() => {
     const montoNumero = Number(monto)
     if (!montoNumero || !mesInicio || !anioInicio || !mesFin || !anioFin) return null
-    return calcularInflacion(ipcData, { monto: montoNumero, mesInicio, anioInicio, mesFin, anioFin })
-  }, [ipcData, monto, mesInicio, anioInicio, mesFin, anioFin])
+    return calcularInflacion(data, { monto: montoNumero, mesInicio, anioInicio, mesFin, anioFin })
+  }, [data, monto, mesInicio, anioInicio, mesFin, anioFin])
 
   return (
     <div >
@@ -51,6 +44,10 @@ export default function Calculadora() {
          <p className='mb-4 text-sm text-muted-foreground'>Cargando datos del IPC...</p>
        )}
 
+       {isError && (
+         <p className='mb-4 text-sm text-red-600'>No se pudieron cargar los datos del IPC. Intente nuevamente más tarde.</p>
+       )}
+
        <div className='grid grid-cols-1 md:grid-cols-2 gap-10 bg-teal-500/20 w-full rounded-2xl px-10 py-14'>
         <Ingreso
           monto={monto}
@@ -64,7 +61,7 @@ export default function Calculadora() {
           onMesFinChange={setMesFin}
           onAnioFinChange={setAnioFin}
           anios={anios}
-          ipcData={ipcData}
+          ipcData={data}
         />
         <Egreso resultado={resultado} />
         </div>
