@@ -15,6 +15,8 @@ export const MESES = [
   "Diciembre",
 ]
 
+export const MESES_ABREVIADOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+
 export function getAniosDisponibles(ipcData: IpcEntry[]): number[] {
   const anios = new Set(ipcData.map((entrada) => entrada.anio))
   return Array.from(anios).sort((a, b) => a - b)

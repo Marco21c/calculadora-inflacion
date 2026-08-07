@@ -14,7 +14,7 @@ export default function DetalleEntradaIpc({ entrada }: { entrada: IpcEntry }) {
   return (
     <div className="divide-y divide-border rounded-md border border-border px-3">
       <Fila etiqueta="IPC" valor={String(entrada.ipc)} />
-      <Fila etiqueta="Inflación mensual" valor={formatoPorcentaje(entrada.inflacionMensual)} />
+      <Fila etiqueta="Inflación mensual" valor={String(entrada.inflacionMensual)} />
       <Fila
         etiqueta="Inflación interanual"
         valor={entrada.inflacionInteranual === null ? "-" : formatoPorcentaje(entrada.inflacionInteranual)}

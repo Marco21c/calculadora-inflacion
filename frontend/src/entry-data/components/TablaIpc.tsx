@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import ConfirmDialog from "@/components/ConfirmDialog"
-import { MESES, formatoPorcentaje } from "@/calculadora/utils/ipc"
+import { MESES, MESES_ABREVIADOS, formatoPorcentaje } from "@/calculadora/utils/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
 import { useEliminarEntradaMutation, useGuardarEntradasMasivoMutation } from "../hooks/ipcEntriesQueries"
 import DetalleEntradaIpc from "./DetalleEntradaIpc"
@@ -16,8 +16,6 @@ interface TablaIpcProps {
   soloLectura?: boolean
   alturaMaxima?: number
 }
-
-const MESES_ABREVIADOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
 const inputClassName = "text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 
@@ -242,7 +240,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         header: "Inflación mensual",
         cell: ({ row }) =>
           soloLectura ? (
-            formatoPorcentaje(row.original.inflacionMensual)
+            row.original.inflacionMensual
           ) : (
             <input
               type="number"
@@ -394,7 +392,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         <Table>
          <TableHeader className="bg-gray-300/80">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-gray-200">
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -405,9 +403,9 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} >
+              <TableRow key={row.id} className="border-gray-200">
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="border-x border-gray-200 text-center">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  <TableCell key={cell.id} className="border-x border-gray-200/80 text-center">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                 ))}
               </TableRow>
             ))}

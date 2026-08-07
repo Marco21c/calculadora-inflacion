@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import Egreso from "../components/Egreso";
 import Ingreso from "../components/Ingreso";
 import logo from '@/assets/logo.png'
 import {  getAniosDisponibles } from "../utils/ipc";
-import { calcularInflacion } from "../utils/calculos";
+import { calcularInflacion, getEntradasDelPeriodo, getEntradasDesde, getVariacionAnual } from "../utils/calculos";
 import { useIpcEntriesQuery } from "@/entry-data/hooks/ipcEntriesQueries";
 
+const GraficoVariacionMensual = lazy(() => import("../components/GraficoVariacionMensual"))
+const GraficoVariacionAnual = lazy(() => import("../components/GraficoVariacionAnual"))
 
 export default function Calculadora() {
 
@@ -25,6 +27,15 @@ export default function Calculadora() {
     if (!montoNumero || !mesInicio || !anioInicio || !mesFin || !anioFin) return null
     return calcularInflacion(data, { monto: montoNumero, mesInicio, anioInicio, mesFin, anioFin })
   }, [data, monto, mesInicio, anioInicio, mesFin, anioFin])
+
+  const periodoCompleto = Boolean(mesInicio && anioInicio && mesFin && anioFin)
+
+  const entradasMensual = useMemo(() => {
+    if (periodoCompleto) return getEntradasDelPeriodo(data, { mesInicio, anioInicio, mesFin, anioFin })
+    return getEntradasDesde(data, 2023, 6)
+  }, [data, periodoCompleto, mesInicio, anioInicio, mesFin, anioFin])
+
+  const variacionAnual = useMemo(() => getVariacionAnual(data), [data])
 
   return (
     <div >
@@ -65,6 +76,15 @@ export default function Calculadora() {
         />
         <Egreso resultado={resultado} />
         </div>
+
+       {data.length > 0 && (
+         <Suspense fallback={<p className='mt-10 text-sm text-muted-foreground'>Cargando gráficos...</p>}>
+           <div className='mt-10 grid grid-cols-1 md:grid-cols-2 gap-4'>
+             <GraficoVariacionMensual entradas={entradasMensual} />
+             <GraficoVariacionAnual variacionAnual={variacionAnual} />
+           </div>
+         </Suspense>
+       )}
     </div>
   )
 }

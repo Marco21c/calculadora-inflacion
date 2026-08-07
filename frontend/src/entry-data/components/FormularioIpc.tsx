@@ -12,6 +12,13 @@ interface FormularioIpcProps {
   entradas: IpcEntry[]
 }
 
+function parsearNumeroOpcional(valor: string): { ok: true; valor: number | null } | { ok: false } {
+  if (valor.trim() === "") return { ok: true, valor: null }
+  const numero = Number(valor)
+  if (Number.isNaN(numero)) return { ok: false }
+  return { ok: true, valor: numero }
+}
+
 const inputClassName =
   "h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
@@ -35,10 +42,16 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
     const anioNumero = siguientePeriodo?.anio ?? Number(anio)
     const ipcNumero = Number(ipc)
     const inflacionMensualNumero = Number(inflacionMensual)
+    const inflacionInteranualParsed = parsearNumeroOpcional(inflacionInteranual)
+    const promedioAnualIpcParsed = parsearNumeroOpcional(promedioAnualIpc)
+    const variacionInteranualPromedioParsed = parsearNumeroOpcional(variacionInteranualPromedio)
 
-    if ( !mesNumero || !anioNumero || ipc.trim() === "" ||
-      Number.isNaN(ipcNumero) || inflacionMensual.trim() === "" || Number.isNaN(inflacionMensualNumero) ) {
-      toast.error("Completá mes, año, IPC e inflación mensual.")
+    if (
+      !mesNumero || !anioNumero || ipc.trim() === "" ||
+      Number.isNaN(ipcNumero) || inflacionMensual.trim() === "" || Number.isNaN(inflacionMensualNumero) ||
+      !inflacionInteranualParsed.ok || !promedioAnualIpcParsed.ok || !variacionInteranualPromedioParsed.ok
+    ) {
+      toast.error("Completá mes, año, IPC e inflación mensual con valores numéricos válidos.")
       return
     }
 
@@ -47,10 +60,9 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
       anio: anioNumero,
       ipc: ipcNumero,
       inflacionMensual: inflacionMensualNumero,
-      inflacionInteranual: inflacionInteranual.trim() === "" ? null : Number(inflacionInteranual),
-      promedioAnualIpc: promedioAnualIpc.trim() === "" ? null : Number(promedioAnualIpc),
-      variacionInteranualPromedio:
-        variacionInteranualPromedio.trim() === "" ? null : Number(variacionInteranualPromedio),
+      inflacionInteranual: inflacionInteranualParsed.valor,
+      promedioAnualIpc: promedioAnualIpcParsed.valor,
+      variacionInteranualPromedio: variacionInteranualPromedioParsed.valor,
     })
   }
 
@@ -126,15 +138,15 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <label htmlFor="inflacionMensual" className="text-sm font-semibold text-foreground">
-            Inflación mensual (%)
+            Inflación mensual
           </label>
           <input
             id="inflacionMensual"
             type="number"
-            step="0.01"
+            step="0.001"
             value={inflacionMensual}
             onChange={(e) => setInflacionMensual(e.target.value)}
-            placeholder="2.10"
+            placeholder="0.023 (= 2.3%)"
             className={inputClassName}
           />
         </div>
