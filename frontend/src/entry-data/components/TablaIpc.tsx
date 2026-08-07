@@ -499,7 +499,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
 
       <div className={alturaMaxima ? "overflow-y-auto" : undefined} style={alturaMaxima ? { maxHeight: alturaMaxima } : undefined}>
         <Table>
-         <TableHeader className="bg-gray-300/80">
+         <TableHeader className="bg-gray-200/80 text-semibold">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-gray-200">
                 {headerGroup.headers.map((header) => (

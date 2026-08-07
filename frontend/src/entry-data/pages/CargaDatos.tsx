@@ -70,10 +70,11 @@ export default function CargaDatos() {
               </p>
            </div>
           <div className="flex flex-col gap-4 mt-4  rounded-2xl px-10 py-14 border border-2 border-muted-foreground/20">
+             <p className="text-red-400/40 text-sm text-foreground border-b border-muted-foreground/20 p-2"> (*) Revisar datos antes de guardar </p>
             {cargando ? (
               <p className="text-sm text-muted-foreground">Cargando...</p>
             ) : (
-              <TablaIpc entradas={entradas} alturaMaxima={600}/>
+              <TablaIpc entradas={entradas} alturaMaxima={560}/>
             )}
           </div>
         </TabsContent>

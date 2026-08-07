@@ -1,5 +1,5 @@
 import { ChevronsUpDown } from "lucide-react"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { MESES, getMesesDisponibles } from "../utils/ipc"
 import type { IpcEntry } from "@/interfaces/ipc"
 
@@ -110,6 +110,17 @@ export default function Ingreso({
         return false
       })
   }, [ipcData, anioFin, anioInicio, mesInicio, opcionesMeses])
+
+  // Si el mes ya elegido queda inválido por un cambio posterior (año, u otro
+  // mes cuando coinciden los años), "disabled" en el <option> no lo
+  // deselecciona solo: hay que limpiarlo para que no quede una fecha inválida.
+  useEffect(() => {
+    if (mesInicio && mesesDeshabilitadosInicio.includes(mesInicio)) onMesInicioChange(0)
+  }, [mesInicio, mesesDeshabilitadosInicio, onMesInicioChange])
+
+  useEffect(() => {
+    if (mesFin && mesesDeshabilitadosFin.includes(mesFin)) onMesFinChange(0)
+  }, [mesFin, mesesDeshabilitadosFin, onMesFinChange])
 
   return (
     <form className="flex h-full w-full flex-col gap-6">
