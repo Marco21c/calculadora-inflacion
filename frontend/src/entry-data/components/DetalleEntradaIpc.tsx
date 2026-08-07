@@ -1,5 +1,5 @@
 import { formatoPorcentaje } from "@/calculadora/utils/ipc"
-import type { IpcEntry } from "@/interfaces/ipc"
+import type { IpcEntryEditable } from "@/interfaces/ipc"
 
 function Fila({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
@@ -10,11 +10,11 @@ function Fila({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   )
 }
 
-export default function DetalleEntradaIpc({ entrada }: { entrada: IpcEntry }) {
+export default function DetalleEntradaIpc({ entrada }: { entrada: IpcEntryEditable }) {
   return (
     <div className="divide-y divide-border rounded-md border border-border px-3">
-      <Fila etiqueta="IPC" valor={String(entrada.ipc)} />
-      <Fila etiqueta="Inflación mensual" valor={String(entrada.inflacionMensual)} />
+      <Fila etiqueta="IPC" valor={entrada.ipc === null ? "-" : String(entrada.ipc)} />
+      <Fila etiqueta="Inflación mensual" valor={entrada.inflacionMensual === null ? "-" : String(entrada.inflacionMensual)} />
       <Fila
         etiqueta="Inflación interanual"
         valor={entrada.inflacionInteranual === null ? "-" : formatoPorcentaje(entrada.inflacionInteranual)}

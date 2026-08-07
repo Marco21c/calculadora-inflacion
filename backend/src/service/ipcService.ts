@@ -34,6 +34,9 @@ export function saveAndReplace(entradas: IpcEntry[]): Promise<IpcEntry[]> {
         create: entrada,
       }),
     ),
+    // Default de Prisma (5000ms) no alcanza para muchas filas contra la
+    // latencia de red de Supabase: ver prisma/seed.ts, mismo ajuste.
+    { timeout: 30000 },
   )
 }
 

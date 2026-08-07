@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react"
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table"
 import { Trash2 } from "lucide-react"
 import { toast } from "sonner"
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { MESES, MESES_ABREVIADOS, formatoPorcentaje } from "@/calculadora/utils/ipc"
-import type { IpcEntry } from "@/interfaces/ipc"
+import type { IpcEntry, IpcEntryEditable } from "@/interfaces/ipc"
 import { useEliminarEntradaMutation, useGuardarEntradasMasivoMutation } from "../hooks/ipcEntriesQueries"
 import DetalleEntradaIpc from "./DetalleEntradaIpc"
 import { calcularSiguientePeriodo } from "../utils/calcularSiguientePeriodo"
@@ -31,12 +31,12 @@ const COLUMNAS_NAVEGABLES: ColumnaNavegable[] = [
   "variacionInteranualPromedio",
 ]
 
-function filaVacia(anio: number, mes: number): IpcEntry {
+function filaVacia(anio: number, mes: number): IpcEntryEditable {
   return {
     anio,
     mes,
-    ipc: 0,
-    inflacionMensual: 0,
+    ipc: null,
+    inflacionMensual: null,
     inflacionInteranual: null,
     promedioAnualIpc: null,
     variacionInteranualPromedio: null,
@@ -45,6 +45,56 @@ function filaVacia(anio: number, mes: number): IpcEntry {
 
 function formatoOpcional(valor: number | null): string {
   return valor === null ? "-" : formatoPorcentaje(valor)
+}
+
+function filaTieneCamposObligatorios(fila: IpcEntryEditable): boolean {
+  return fila.ipc !== null && Number.isFinite(fila.ipc) && fila.inflacionMensual !== null && Number.isFinite(fila.inflacionMensual)
+}
+
+function aIpcEntry(fila: IpcEntryEditable): IpcEntry {
+  // Solo se llama después de validar con filaTieneCamposObligatorios.
+  return { ...fila, ipc: fila.ipc as number, inflacionMensual: fila.inflacionMensual as number }
+}
+
+interface EstadoEdicion {
+  filas: IpcEntryEditable[]
+  historial: IpcEntryEditable[][]
+  futuro: IpcEntryEditable[][]
+}
+
+type AccionEdicion =
+  | { type: "reset"; filas: IpcEntryEditable[] }
+  | { type: "aplicar"; actualizador: (prev: IpcEntryEditable[]) => IpcEntryEditable[] }
+  | { type: "deshacer" }
+  | { type: "rehacer" }
+
+function reducerEdicion(estado: EstadoEdicion, accion: AccionEdicion): EstadoEdicion {
+  switch (accion.type) {
+    case "reset":
+      return { filas: accion.filas, historial: [], futuro: [] }
+    case "aplicar":
+      return {
+        filas: accion.actualizador(estado.filas),
+        historial: [...estado.historial, estado.filas],
+        futuro: [],
+      }
+    case "deshacer": {
+      if (estado.historial.length === 0) return estado
+      return {
+        filas: estado.historial[estado.historial.length - 1],
+        historial: estado.historial.slice(0, -1),
+        futuro: [...estado.futuro, estado.filas],
+      }
+    }
+    case "rehacer": {
+      if (estado.futuro.length === 0) return estado
+      return {
+        filas: estado.futuro[estado.futuro.length - 1],
+        futuro: estado.futuro.slice(0, -1),
+        historial: [...estado.historial, estado.filas],
+      }
+    }
+  }
 }
 
 function parsearNumeroPegado(texto: string): number | null {
@@ -59,15 +109,31 @@ function parsearNumeroPegado(texto: string): number | null {
 }
 
 export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }: TablaIpcProps) {
-  const [filas, setFilas] = useState<IpcEntry[]>(entradas)
-  const [periodoAEliminar, setPeriodoAEliminar] = useState<IpcEntry | null>(null)
+  const [{ filas, historial, futuro }, dispatch] = useReducer(reducerEdicion, {
+    filas: entradas,
+    historial: [],
+    futuro: [],
+  })
+  const [periodoAEliminar, setPeriodoAEliminar] = useState<IpcEntryEditable | null>(null)
   const [confirmarGuardado, setConfirmarGuardado] = useState(false)
   const eliminarMutation = useEliminarEntradaMutation()
   const guardarMasivoMutation = useGuardarEntradasMasivoMutation()
 
   useEffect(() => {
-    setFilas(entradas)
+    dispatch({ type: "reset", filas: entradas })
   }, [entradas])
+
+  function aplicarCambio(actualizador: (prev: IpcEntryEditable[]) => IpcEntryEditable[]) {
+    dispatch({ type: "aplicar", actualizador })
+  }
+
+  function deshacer() {
+    dispatch({ type: "deshacer" })
+  }
+
+  function rehacer() {
+    dispatch({ type: "rehacer" })
+  }
 
   const huboCambios = useMemo(() => JSON.stringify(filas) !== JSON.stringify(entradas), [filas, entradas])
 
@@ -86,18 +152,26 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
     return !entradas.some((entrada) => entrada.anio === ultima.anio && entrada.mes === ultima.mes)
   }, [filas, entradas])
 
-  function actualizarCampoRequerido(anio: number, mes: number, campo: CampoRequerido, valor: string) {
-    const numero = Number(valor)
-    if (Number.isNaN(numero)) return
-    setFilas((prev) =>
-      prev.map((fila) => (fila.anio === anio && fila.mes === mes ? { ...fila, [campo]: numero } : fila)),
-    )
-  }
+  const entradasPorClave = useMemo(() => {
+    const mapa = new Map<string, IpcEntry>()
+    entradas.forEach((entrada) => mapa.set(`${entrada.anio}-${entrada.mes}`, entrada))
+    return mapa
+  }, [entradas])
 
-  function actualizarCampoOpcional(anio: number, mes: number, campo: CampoOpcional, valor: string) {
+  const campoFueModificado = useCallback(
+    (fila: IpcEntryEditable, campo: ColumnaNavegable): boolean => {
+      const original = entradasPorClave.get(`${fila.anio}-${fila.mes}`)
+      // Fila nueva (todavía no guardada): se resalta cualquier campo ya cargado.
+      if (!original) return fila[campo] !== null
+      return fila[campo] !== original[campo]
+    },
+    [entradasPorClave],
+  )
+
+  function actualizarCampo(anio: number, mes: number, campo: ColumnaNavegable, valor: string) {
     const numero = valor.trim() === "" ? null : Number(valor)
     if (numero !== null && Number.isNaN(numero)) return
-    setFilas((prev) =>
+    aplicarCambio((prev) =>
       prev.map((fila) => (fila.anio === anio && fila.mes === mes ? { ...fila, [campo]: numero } : fila)),
     )
   }
@@ -114,7 +188,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
       .filter((linea, indice, arreglo) => !(indice === arreglo.length - 1 && linea === ""))
     const columnaInicioIndex = COLUMNAS_NAVEGABLES.indexOf(columnaId)
 
-    setFilas((prev) =>
+    aplicarCambio((prev) =>
       prev.map((fila, indice) => {
         const offsetFila = indice - filaIndex
         if (offsetFila < 0 || offsetFila >= filasPegadas.length) return fila
@@ -127,11 +201,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
           if (!columnaActual) return
 
           const numero = parsearNumeroPegado(valorTexto)
-          if (columnaActual === "ipc" || columnaActual === "inflacionMensual") {
-            if (numero !== null) filaActualizada = { ...filaActualizada, [columnaActual]: numero }
-          } else {
-            filaActualizada = { ...filaActualizada, [columnaActual]: numero }
-          }
+          filaActualizada = { ...filaActualizada, [columnaActual]: numero }
         })
 
         return filaActualizada
@@ -145,12 +215,12 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
       toast.error("No se pudo calcular el próximo período.")
       return
     }
-    setFilas((prev) => [...prev, filaVacia(siguiente.anio, siguiente.mes)])
+    aplicarCambio((prev) => [...prev, filaVacia(siguiente.anio, siguiente.mes)])
   }
 
   function handleEliminarUltimaFila() {
     if (!ultimaFilaEsNueva) return
-    setFilas((prev) => prev.slice(0, -1))
+    aplicarCambio((prev) => prev.slice(0, -1))
   }
 
   function handleTeclado(evento: React.KeyboardEvent<HTMLInputElement>, filaIndex: number, columnaId: ColumnaNavegable) {
@@ -198,8 +268,19 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
     )
   }
 
+  function handleAbrirConfirmacion() {
+    const filasInvalidas = filasModificadas.filter((fila) => !filaTieneCamposObligatorios(fila))
+    if (filasInvalidas.length > 0) {
+      toast.error(
+        `Hay ${filasInvalidas.length === 1 ? "un período" : `${filasInvalidas.length} períodos`} con IPC o inflación mensual inválidos. Completá esos campos antes de guardar.`,
+      )
+      return
+    }
+    setConfirmarGuardado(true)
+  }
+
   function confirmarGuardarCambios() {
-    guardarMasivoMutation.mutate(filas, {
+    guardarMasivoMutation.mutate(filasModificadas.map(aIpcEntry), {
       onSuccess: () => {
         toast.success("Cambios guardados.")
         setConfirmarGuardado(false)
@@ -208,8 +289,14 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
     })
   }
 
-  const columnas = useMemo<ColumnDef<IpcEntry>[]>(() => {
-    const columnasBase: ColumnDef<IpcEntry>[] = [
+  const claseInput = useCallback(
+    (fila: IpcEntryEditable, campo: ColumnaNavegable): string =>
+      campoFueModificado(fila, campo) ? `${inputClassName} bg-amber-100` : inputClassName,
+    [campoFueModificado],
+  )
+
+  const columnas = useMemo<ColumnDef<IpcEntryEditable>[]>(() => {
+    const columnasBase: ColumnDef<IpcEntryEditable>[] = [
       {
         id: "periodo",
         header: "Período",
@@ -225,13 +312,13 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
             <input
               type="number"
               step="0.01"
-              value={row.original.ipc}
-              onChange={(e) => actualizarCampoRequerido(row.original.anio, row.original.mes, "ipc", e.target.value)}
+              value={row.original.ipc ?? ""}
+              onChange={(e) => actualizarCampo(row.original.anio, row.original.mes, "ipc", e.target.value)}
               onKeyDown={(e) => handleTeclado(e, row.index, "ipc")}
               onPaste={(e) => handlePegado(e, row.index, "ipc")}
               data-row={row.index}
               data-col="ipc"
-              className={inputClassName}
+              className={claseInput(row.original, "ipc")}
             />
           ),
       },
@@ -245,15 +332,15 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
             <input
               type="number"
               step="0.01"
-              value={row.original.inflacionMensual}
+              value={row.original.inflacionMensual ?? ""}
               onChange={(e) =>
-                actualizarCampoRequerido(row.original.anio, row.original.mes, "inflacionMensual", e.target.value)
+                actualizarCampo(row.original.anio, row.original.mes, "inflacionMensual", e.target.value)
               }
               onKeyDown={(e) => handleTeclado(e, row.index, "inflacionMensual")}
               onPaste={(e) => handlePegado(e, row.index, "inflacionMensual")}
               data-row={row.index}
               data-col="inflacionMensual"
-              className={inputClassName}
+              className={claseInput(row.original, "inflacionMensual")}
             />
           ),
       },
@@ -269,13 +356,13 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               step="0.01"
               value={row.original.inflacionInteranual ?? ""}
               onChange={(e) =>
-                actualizarCampoOpcional(row.original.anio, row.original.mes, "inflacionInteranual", e.target.value)
+                actualizarCampo(row.original.anio, row.original.mes, "inflacionInteranual", e.target.value)
               }
               onKeyDown={(e) => handleTeclado(e, row.index, "inflacionInteranual")}
               onPaste={(e) => handlePegado(e, row.index, "inflacionInteranual")}
               data-row={row.index}
               data-col="inflacionInteranual"
-              className={inputClassName}
+              className={claseInput(row.original, "inflacionInteranual")}
             />
           ),
       },
@@ -291,12 +378,12 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               step="0.01"
               value={row.original.promedioAnualIpc ?? ""}
               onChange={(e) =>
-                actualizarCampoOpcional(row.original.anio, row.original.mes, "promedioAnualIpc", e.target.value)
+                actualizarCampo(row.original.anio, row.original.mes, "promedioAnualIpc", e.target.value)
               }
               onKeyDown={(e) => handleTeclado(e, row.index, "promedioAnualIpc")}
               data-row={row.index}
               data-col="promedioAnualIpc"
-              className={inputClassName}
+              className={claseInput(row.original, "promedioAnualIpc")}
             />
           ),
       },
@@ -312,7 +399,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               step="0.01"
               value={row.original.variacionInteranualPromedio ?? ""}
               onChange={(e) =>
-                actualizarCampoOpcional(
+                actualizarCampo(
                   row.original.anio,
                   row.original.mes,
                   "variacionInteranualPromedio",
@@ -322,7 +409,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
               onKeyDown={(e) => handleTeclado(e, row.index, "variacionInteranualPromedio")}
               data-row={row.index}
               data-col="variacionInteranualPromedio"
-              className={inputClassName}
+              className={claseInput(row.original, "variacionInteranualPromedio")}
             />
           ),
       },
@@ -348,7 +435,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         ),
       },
     ]
-  }, [soloLectura])
+  }, [soloLectura, claseInput])
 
   const table = useReactTable({
     data: filas,
@@ -365,6 +452,28 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
     <div className="flex flex-col gap-3">
       {!soloLectura && (
         <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={deshacer}
+            disabled={historial.length === 0}
+            title="Deshacer"
+            aria-label="Deshacer"
+            className="w-fit"
+          >
+           Deshacer
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={rehacer}
+            disabled={futuro.length === 0}
+            title="Rehacer"
+            aria-label="Rehacer"
+            className="w-fit"
+          >
+           Rehacer
+          </Button>
           <Button type="button" variant="outline" onClick={handleAgregarFila} className="w-fit">
             Agregar nueva fila
           </Button>
@@ -379,7 +488,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
           </Button>
           <Button
           type="button"
-          onClick={() => setConfirmarGuardado(true)}
+          onClick={handleAbrirConfirmacion}
           disabled={!huboCambios || guardarMasivoMutation.isPending}
           className="w-fit"
         >

@@ -1,6 +1,6 @@
-import type { IpcEntry } from "@/interfaces/ipc"
-
-export function calcularSiguientePeriodo(entradas: IpcEntry[]): { mes: number; anio: number } | null {
+export function calcularSiguientePeriodo(
+  entradas: { anio: number; mes: number }[],
+): { mes: number; anio: number } | null {
   if (entradas.length === 0) return null
   const ultimo = entradas.reduce((max, entrada) =>
     entrada.anio > max.anio || (entrada.anio === max.anio && entrada.mes > max.mes) ? entrada : max,
