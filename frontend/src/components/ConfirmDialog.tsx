@@ -41,7 +41,9 @@ export default function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
-        {detalle && <div className="w-full text-sm text-foreground">{detalle}</div>}
+        {detalle && (
+          <div className="max-h-[500px] w-full overflow-y-auto text-sm text-foreground">{detalle}</div>
+        )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction

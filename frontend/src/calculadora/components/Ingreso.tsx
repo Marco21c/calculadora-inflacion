@@ -128,16 +128,19 @@ export default function Ingreso({
         <label htmlFor="monto" className="font-semibold text-foreground">
           Ingresar el monto a calcular:
         </label>
-        <input
-          id="monto"
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="Ingresar Cantidad ($) "
-          value={monto}
-          onChange={(e) => onMontoChange(e.target.value)}
-          className="w-full max-w-md border-0 border-b-2 border-foreground/50 bg-white px-3 py-2 text-lg font-semibold text-foreground outline-none focus-visible:border-ring"
-        />
+        <div className="relative max-w-md">
+          <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-foreground/50">$</span>
+          <input
+            id="monto"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Ingresar cantidad"
+            value={monto}
+            onChange={(e) => onMontoChange(e.target.value)}
+            className="h-12 w-full rounded-md border border-input bg-white pr-3 pl-7 text-lg font-semibold text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">

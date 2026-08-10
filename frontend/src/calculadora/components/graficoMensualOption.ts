@@ -1,0 +1,84 @@
+import type { EChartsOption } from "echarts-for-react"
+import type { IpcEntry } from "@/interfaces/ipc"
+import { MESES_ABREVIADOS } from "../utils/ipc"
+
+const COLOR_SERIE = "#2a78d6"
+const COLOR_MUTED = "#898781"
+const COLOR_GRID = "#e1e0d9"
+const COLOR_BASELINE = "#c3c2b7"
+
+export function construirOptionVariacionMensual(entradas: IpcEntry[]): EChartsOption {
+  const categorias = entradas.map((entrada) => `${MESES_ABREVIADOS[entrada.mes - 1]} ${entrada.anio}`)
+  const valores = entradas.map((entrada) => Number((entrada.inflacionMensual * 100).toFixed(1)))
+
+  return {
+    grid: { left: 48, right: 16, top: 16, bottom: 32 },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "line" },
+      valueFormatter: (valor: number) => `${valor.toFixed(1)}%`,
+      textStyle: { color: "#0b0b0b" },
+    },
+    xAxis: {
+      type: "category",
+      data: categorias,
+      axisLine: { lineStyle: { color: COLOR_GRID } },
+      axisTick: { show: false },
+      axisLabel: { color: COLOR_MUTED, fontSize: 11 },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: COLOR_MUTED, fontSize: 11, formatter: (valor: number) => `${valor.toFixed(1)}%` },
+      splitLine: { lineStyle: { color: COLOR_GRID } },
+    },
+    series: [
+      {
+        type: "line",
+        data: valores,
+        lineStyle: { color: COLOR_SERIE, width: 2 },
+        itemStyle: { color: COLOR_SERIE },
+        symbol: "circle",
+        symbolSize: 8,
+        areaStyle: { color: COLOR_SERIE, opacity: 0.1 },
+        markLine: {
+          symbol: "none",
+          silent: true,
+          label: { show: false },
+          lineStyle: { color: COLOR_BASELINE, width: 1, type: "solid" },
+          data: [{ yAxis: 0 }],
+        },
+      },
+    ],
+    textStyle: { color: "#52514e", fontFamily: "inherit" },
+  }
+}
+
+// Sparkline: sin ejes ni grilla visibles, con el mismo hover (tooltip +
+// crosshair) que el gráfico grande — así se puede ver el valor de cualquier
+// mes sin amontonar labels fijos cuando el período es largo.
+export function construirOptionSparklineMensual(entradas: IpcEntry[]): EChartsOption {
+  const categorias = entradas.map((entrada) => `${MESES_ABREVIADOS[entrada.mes - 1]} ${entrada.anio}`)
+  const valores = entradas.map((entrada) => Number((entrada.inflacionMensual * 100).toFixed(1)))
+
+  return {
+    grid: { left: 12, right: 12, top: 12, bottom: 4 },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "line" },
+      valueFormatter: (valor: number) => `${valor.toFixed(1)}%`,
+      textStyle: { color: "#0b0b0b" },
+    },
+    xAxis: { type: "category", data: categorias, show: false, boundaryGap: false },
+    yAxis: { type: "value", show: false },
+    series: [
+      {
+        type: "line",
+        data: valores,
+        lineStyle: { color: COLOR_SERIE, width: 2 },
+        itemStyle: { color: COLOR_SERIE },
+        showSymbol: false,
+        areaStyle: { color: COLOR_SERIE, opacity: 0.1 },
+      },
+    ],
+  }
+}

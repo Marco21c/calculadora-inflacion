@@ -7,6 +7,7 @@ import { calcularInflacion, getEntradasDelPeriodo, getEntradasDesde, getVariacio
 import { useIpcEntriesQuery } from "@/entry-data/hooks/ipcEntriesQueries";
 
 const GraficoVariacionMensual = lazy(() => import("../components/GraficoVariacionMensual"))
+const GraficoVariacionMensualPeriodo = lazy(() => import("../components/GraficoVariacionMensualPeriodo"))
 const GraficoVariacionAnual = lazy(() => import("../components/GraficoVariacionAnual"))
 
 export default function Calculadora() {
@@ -28,11 +29,13 @@ export default function Calculadora() {
     return calcularInflacion(data, { monto: montoNumero, mesInicio, anioInicio, mesFin, anioFin })
   }, [data, monto, mesInicio, anioInicio, mesFin, anioFin])
 
+  const entradasMensual = useMemo(() => getEntradasDesde(data, 2023, 6), [data])
+
   const periodoCompleto = Boolean(mesInicio && anioInicio && mesFin && anioFin)
 
-  const entradasMensual = useMemo(() => {
-    if (periodoCompleto) return getEntradasDelPeriodo(data, { mesInicio, anioInicio, mesFin, anioFin })
-    return getEntradasDesde(data, 2023, 6)
+  const entradasPeriodo = useMemo(() => {
+    if (!periodoCompleto) return []
+    return getEntradasDelPeriodo(data, { mesInicio, anioInicio, mesFin, anioFin }, 3)
   }, [data, periodoCompleto, mesInicio, anioInicio, mesFin, anioFin])
 
   const variacionAnual = useMemo(() => getVariacionAnual(data), [data])
@@ -59,7 +62,7 @@ export default function Calculadora() {
          <p className='mb-4 text-sm text-red-600'>No se pudieron cargar los datos del IPC. Intente nuevamente más tarde.</p>
        )}
 
-       <div className='grid grid-cols-1 md:grid-cols-2 gap-10 bg-teal-500/20 w-full rounded-2xl px-10 py-14'>
+       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-start bg-teal-500/20 w-full rounded-2xl px-10 py-14'>
         <Ingreso
           monto={monto}
           onMontoChange={setMonto}
@@ -74,7 +77,14 @@ export default function Calculadora() {
           anios={anios}
           ipcData={data}
         />
-        <Egreso resultado={resultado} />
+        <div className='flex flex-col gap-1'>
+          <Egreso resultado={resultado} />
+          {entradasPeriodo.length > 0 && (
+            <Suspense fallback={<p className='text-sm text-muted-foreground'>Cargando gráfico...</p>}>
+              <GraficoVariacionMensualPeriodo entradas={entradasPeriodo} />
+            </Suspense>
+          )}
+        </div>
         </div>
 
        {data.length > 0 && (

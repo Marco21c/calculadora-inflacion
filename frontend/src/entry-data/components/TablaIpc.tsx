@@ -5,7 +5,12 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import ConfirmDialog from "@/components/ConfirmDialog"
-import { MESES, MESES_ABREVIADOS, formatoPorcentaje } from "@/calculadora/utils/ipc"
+import { MESES, MESES_ABREVIADOS } from "@/calculadora/utils/ipc"
+import {
+  calcularInflacionInteranual,
+  calcularPromedioAnualIpc,
+  calcularVariacionInteranualPromedio,
+} from "@/calculadora/utils/calculos"
 import type { IpcEntry, IpcEntryEditable } from "@/interfaces/ipc"
 import { useEliminarEntradaMutation, useGuardarEntradasMasivoMutation } from "../hooks/ipcEntriesQueries"
 import DetalleEntradaIpc from "./DetalleEntradaIpc"
@@ -44,7 +49,7 @@ function filaVacia(anio: number, mes: number): IpcEntryEditable {
 }
 
 function formatoOpcional(valor: number | null): string {
-  return valor === null ? "-" : formatoPorcentaje(valor)
+  return valor === null ? "-" : String(valor)
 }
 
 function filaTieneCamposObligatorios(fila: IpcEntryEditable): boolean {
@@ -53,7 +58,52 @@ function filaTieneCamposObligatorios(fila: IpcEntryEditable): boolean {
 
 function aIpcEntry(fila: IpcEntryEditable): IpcEntry {
   // Solo se llama después de validar con filaTieneCamposObligatorios.
-  return { ...fila, ipc: fila.ipc as number, inflacionMensual: fila.inflacionMensual as number }
+  return {
+    ...fila,
+    ipc: fila.ipc as number,
+    inflacionMensual: fila.inflacionMensual as number,
+  }
+}
+
+function entradasCompletas(filas: IpcEntryEditable[]): IpcEntry[] {
+  return filas.filter((fila): fila is IpcEntry => fila.ipc !== null && fila.inflacionMensual !== null)
+}
+
+// Recalcula, para la fila en `indice`, solo lo que quedó afectado por lo que
+// se acaba de tocar en esa misma fila: si cambió el ipc, se recalculan su
+// inflación interanual y su promedio anual de IPC; si cambió (o quedó
+// recalculada) la inflación interanual, se recalcula su variación interanual
+// promedio. No toca ninguna otra fila.
+function conDerivadosRecalculados(
+  filas: IpcEntryEditable[],
+  indice: number,
+  ipcTocado: boolean,
+  interanualTocado: boolean,
+): IpcEntryEditable[] {
+  if (!ipcTocado && !interanualTocado) return filas
+
+  let fila = filas[indice]
+  const anteriores = entradasCompletas(filas.slice(0, indice))
+
+  if (ipcTocado && fila.ipc !== null) {
+    fila = {
+      ...fila,
+      inflacionInteranual: calcularInflacionInteranual(anteriores, fila.anio, fila.mes, fila.ipc),
+      promedioAnualIpc: calcularPromedioAnualIpc(anteriores, fila.ipc),
+    }
+    interanualTocado = true
+  }
+
+  if (interanualTocado) {
+    fila = {
+      ...fila,
+      variacionInteranualPromedio: calcularVariacionInteranualPromedio(anteriores, fila.inflacionInteranual),
+    }
+  }
+
+  const resultado = [...filas]
+  resultado[indice] = fila
+  return resultado
 }
 
 interface EstadoEdicion {
@@ -137,13 +187,19 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
 
   const huboCambios = useMemo(() => JSON.stringify(filas) !== JSON.stringify(entradas), [filas, entradas])
 
+  const entradasPorClave = useMemo(() => {
+    const mapa = new Map<string, IpcEntry>()
+    entradas.forEach((entrada) => mapa.set(`${entrada.anio}-${entrada.mes}`, entrada))
+    return mapa
+  }, [entradas])
+
   const filasModificadas = useMemo(
     () =>
       filas.filter((fila) => {
-        const original = entradas.find((entrada) => entrada.anio === fila.anio && entrada.mes === fila.mes)
+        const original = entradasPorClave.get(`${fila.anio}-${fila.mes}`)
         return JSON.stringify(fila) !== JSON.stringify(original)
       }),
-    [filas, entradas],
+    [filas, entradasPorClave],
   )
 
   const ultimaFilaEsNueva = useMemo(() => {
@@ -151,12 +207,6 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
     if (!ultima) return false
     return !entradas.some((entrada) => entrada.anio === ultima.anio && entrada.mes === ultima.mes)
   }, [filas, entradas])
-
-  const entradasPorClave = useMemo(() => {
-    const mapa = new Map<string, IpcEntry>()
-    entradas.forEach((entrada) => mapa.set(`${entrada.anio}-${entrada.mes}`, entrada))
-    return mapa
-  }, [entradas])
 
   const campoFueModificado = useCallback(
     (fila: IpcEntryEditable, campo: ColumnaNavegable): boolean => {
@@ -171,9 +221,12 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
   function actualizarCampo(anio: number, mes: number, campo: ColumnaNavegable, valor: string) {
     const numero = valor.trim() === "" ? null : Number(valor)
     if (numero !== null && Number.isNaN(numero)) return
-    aplicarCambio((prev) =>
-      prev.map((fila) => (fila.anio === anio && fila.mes === mes ? { ...fila, [campo]: numero } : fila)),
-    )
+    aplicarCambio((prev) => {
+      const indice = prev.findIndex((fila) => fila.anio === anio && fila.mes === mes)
+      if (indice === -1) return prev
+      const actualizado = prev.map((fila, i) => (i === indice ? { ...fila, [campo]: numero } : fila))
+      return conDerivadosRecalculados(actualizado, indice, campo === "ipc", campo === "inflacionInteranual")
+    })
   }
 
   function handlePegado(evento: React.ClipboardEvent, filaIndex: number, columnaId: ColumnaNavegable) {
@@ -188,13 +241,14 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
       .filter((linea, indice, arreglo) => !(indice === arreglo.length - 1 && linea === ""))
     const columnaInicioIndex = COLUMNAS_NAVEGABLES.indexOf(columnaId)
 
-    aplicarCambio((prev) =>
-      prev.map((fila, indice) => {
-        const offsetFila = indice - filaIndex
-        if (offsetFila < 0 || offsetFila >= filasPegadas.length) return fila
+    aplicarCambio((prev) => {
+      let resultado = [...prev]
 
-        const valoresColumnas = filasPegadas[offsetFila].split("\t")
-        let filaActualizada = fila
+      for (let indice = filaIndex; indice < resultado.length && indice - filaIndex < filasPegadas.length; indice++) {
+        const valoresColumnas = filasPegadas[indice - filaIndex].split("\t")
+        let filaActualizada = resultado[indice]
+        let ipcTocado = false
+        let interanualTocado = false
 
         valoresColumnas.forEach((valorTexto, offsetColumna) => {
           const columnaActual = COLUMNAS_NAVEGABLES[columnaInicioIndex + offsetColumna]
@@ -202,11 +256,16 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
 
           const numero = parsearNumeroPegado(valorTexto)
           filaActualizada = { ...filaActualizada, [columnaActual]: numero }
+          if (columnaActual === "ipc") ipcTocado = true
+          if (columnaActual === "inflacionInteranual") interanualTocado = true
         })
 
-        return filaActualizada
-      }),
-    )
+        resultado[indice] = filaActualizada
+        resultado = conDerivadosRecalculados(resultado, indice, ipcTocado, interanualTocado)
+      }
+
+      return resultado
+    })
   }
 
   function handleAgregarFila() {
@@ -280,7 +339,8 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
   }
 
   function confirmarGuardarCambios() {
-    guardarMasivoMutation.mutate(filasModificadas.map(aIpcEntry), {
+    const porGuardar = filasModificadas.map((fila) => aIpcEntry(fila))
+    guardarMasivoMutation.mutate(porGuardar, {
       onSuccess: () => {
         toast.success("Cambios guardados.")
         setConfirmarGuardado(false)
@@ -381,6 +441,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
                 actualizarCampo(row.original.anio, row.original.mes, "promedioAnualIpc", e.target.value)
               }
               onKeyDown={(e) => handleTeclado(e, row.index, "promedioAnualIpc")}
+              onPaste={(e) => handlePegado(e, row.index, "promedioAnualIpc")}
               data-row={row.index}
               data-col="promedioAnualIpc"
               className={claseInput(row.original, "promedioAnualIpc")}
@@ -407,6 +468,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
                 )
               }
               onKeyDown={(e) => handleTeclado(e, row.index, "variacionInteranualPromedio")}
+              onPaste={(e) => handlePegado(e, row.index, "variacionInteranualPromedio")}
               data-row={row.index}
               data-col="variacionInteranualPromedio"
               className={claseInput(row.original, "variacionInteranualPromedio")}
@@ -435,7 +497,7 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
         ),
       },
     ]
-  }, [soloLectura, claseInput])
+  }, [soloLectura, claseInput, entradas])
 
   const table = useReactTable({
     data: filas,
@@ -521,8 +583,6 @@ export default function TablaIpc({ entradas, soloLectura = false, alturaMaxima }
           </TableBody>
         </Table>
       </div>
-
-      
 
       <ConfirmDialog
         open={periodoAEliminar !== null}

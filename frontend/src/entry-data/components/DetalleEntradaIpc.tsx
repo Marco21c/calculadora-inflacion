@@ -1,4 +1,3 @@
-import { formatoPorcentaje } from "@/calculadora/utils/ipc"
 import type { IpcEntryEditable } from "@/interfaces/ipc"
 
 function Fila({ etiqueta, valor }: { etiqueta: string; valor: string }) {
@@ -17,7 +16,7 @@ export default function DetalleEntradaIpc({ entrada }: { entrada: IpcEntryEditab
       <Fila etiqueta="Inflación mensual" valor={entrada.inflacionMensual === null ? "-" : String(entrada.inflacionMensual)} />
       <Fila
         etiqueta="Inflación interanual"
-        valor={entrada.inflacionInteranual === null ? "-" : formatoPorcentaje(entrada.inflacionInteranual)}
+        valor={entrada.inflacionInteranual === null ? "-" : String(entrada.inflacionInteranual)}
       />
       <Fila
         etiqueta="Promedio anual IPC"
@@ -25,9 +24,7 @@ export default function DetalleEntradaIpc({ entrada }: { entrada: IpcEntryEditab
       />
       <Fila
         etiqueta="Variación interanual promedio"
-        valor={
-          entrada.variacionInteranualPromedio === null ? "-" : formatoPorcentaje(entrada.variacionInteranualPromedio)
-        }
+        valor={entrada.variacionInteranualPromedio === null ? "-" : String(entrada.variacionInteranualPromedio)}
       />
     </div>
   )

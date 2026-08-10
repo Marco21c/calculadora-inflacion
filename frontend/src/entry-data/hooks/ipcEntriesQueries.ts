@@ -5,7 +5,10 @@ import { eliminarEntrada, guardarEntrada, guardarEntradasMasivo, listarEntradas 
 export const ipcEntriesQueryKey = ["ipc-entries"] as const
 
 export function useIpcEntriesQuery() {
-  return useQuery({ queryKey: ipcEntriesQueryKey, queryFn: listarEntradas })
+  // Sin esto, cada vez que la ventana recupera el foco (ej: volver de
+  // copiar datos en Excel) React Query refetchea en segundo plano y
+  // TablaIpc resetea la edición en curso al último dato guardado.
+  return useQuery({ queryKey: ipcEntriesQueryKey, queryFn: listarEntradas, refetchOnWindowFocus: false })
 }
 
 export function useGuardarEntradaMutation() {

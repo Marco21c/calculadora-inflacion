@@ -3,6 +3,11 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { MESES } from "@/calculadora/utils/ipc"
+import {
+  calcularInflacionInteranual,
+  calcularPromedioAnualIpc,
+  calcularVariacionInteranualPromedio,
+} from "@/calculadora/utils/calculos"
 import type { IpcEntry } from "@/interfaces/ipc"
 import { useGuardarEntradaMutation } from "../hooks/ipcEntriesQueries"
 import DetalleEntradaIpc from "./DetalleEntradaIpc"
@@ -19,6 +24,10 @@ function parsearNumeroOpcional(valor: string): { ok: true; valor: number | null 
   return { ok: true, valor: numero }
 }
 
+function comoTexto(valor: number | null): string {
+  return valor === null ? "" : valor.toFixed(6)
+}
+
 const inputClassName =
   "h-10 rounded-md border border-input bg-white px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
@@ -27,37 +36,86 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
   const guardarMutation = useGuardarEntradaMutation()
   const [pendiente, setPendiente] = useState<IpcEntry | null>(null)
 
-  const [mes, setMes] = useState("")
-  const [anio, setAnio] = useState("")
   const [ipc, setIpc] = useState("")
   const [inflacionMensual, setInflacionMensual] = useState("")
+
+  // Valor tipeado a mano para cada campo opcional. Mientras el admin no lo
+  // haya tocado, se muestra el calculado en su lugar 
   const [inflacionInteranual, setInflacionInteranual] = useState("")
   const [promedioAnualIpc, setPromedioAnualIpc] = useState("")
   const [variacionInteranualPromedio, setVariacionInteranualPromedio] = useState("")
 
+  const [inflacionInteranualTocado, setInflacionInteranualTocado] = useState(false)
+  const [promedioAnualIpcTocado, setPromedioAnualIpcTocado] = useState(false)
+  const [variacionInteranualPromedioTocado, setVariacionInteranualPromedioTocado] = useState(false)
+
+  const ipcNumero = Number(ipc)
+  const ipcValido = ipc.trim() !== "" && !Number.isNaN(ipcNumero)
+
+  const inflacionInteranualCalculado = useMemo(() => {
+    if (!ipcValido || !siguientePeriodo) return null
+    return calcularInflacionInteranual(entradas, siguientePeriodo.anio, siguientePeriodo.mes, ipcNumero)
+  }, [entradas, siguientePeriodo, ipcValido, ipcNumero])
+
+  const promedioAnualIpcCalculado = useMemo(() => {
+    if (!ipcValido) return null
+    return calcularPromedioAnualIpc(entradas, ipcNumero)
+  }, [entradas, ipcValido, ipcNumero])
+
+  // Valor efectivamente mostrado en cada input: el tipeado a mano si el
+  // admin lo tocó, si no el calculado en vivo.
+  const inflacionInteranualMostrado = inflacionInteranualTocado
+    ? inflacionInteranual
+    : comoTexto(inflacionInteranualCalculado)
+  const inflacionInteranualParsed = parsearNumeroOpcional(inflacionInteranualMostrado)
+
+  const variacionInteranualPromedioCalculado = useMemo(() => {
+    if (!ipcValido) return null
+    return calcularVariacionInteranualPromedio(entradas, inflacionInteranualParsed.ok ? inflacionInteranualParsed.valor : null)
+  }, [entradas, ipcValido, inflacionInteranualParsed])
+
+  const promedioAnualIpcMostrado = promedioAnualIpcTocado ? promedioAnualIpc : comoTexto(promedioAnualIpcCalculado)
+  const promedioAnualIpcParsed = parsearNumeroOpcional(promedioAnualIpcMostrado)
+
+  const variacionInteranualPromedioMostrado = variacionInteranualPromedioTocado
+    ? variacionInteranualPromedio
+    : comoTexto(variacionInteranualPromedioCalculado)
+  const variacionInteranualPromedioParsed = parsearNumeroOpcional(variacionInteranualPromedioMostrado)
+
+  // Si el admin vació un campo tocado a mano, al cambiar el IPC volvemos a
+  // modo automático para que se autocomplete de nuevo (en vez de quedar
+  // "tocado" para siempre con un valor vacío). Ajustamos el estado durante
+  // el render (patrón recomendado por React) en vez de usar un efecto.
+  const [ipcAnterior, setIpcAnterior] = useState(ipc)
+  if (ipc !== ipcAnterior) {
+    setIpcAnterior(ipc)
+    if (inflacionInteranualTocado && inflacionInteranual.trim() === "") setInflacionInteranualTocado(false)
+    if (promedioAnualIpcTocado && promedioAnualIpc.trim() === "") setPromedioAnualIpcTocado(false)
+    if (variacionInteranualPromedioTocado && variacionInteranualPromedio.trim() === "") setVariacionInteranualPromedioTocado(false)
+  }
+
   function handleSubmit(evento: React.FormEvent) {
     evento.preventDefault()
 
-    const mesNumero = siguientePeriodo?.mes ?? Number(mes)
-    const anioNumero = siguientePeriodo?.anio ?? Number(anio)
-    const ipcNumero = Number(ipc)
+    if (!siguientePeriodo) {
+      toast.error("No se pudieron cargar los períodos existentes. Recargá la página para continuar.")
+      return
+    }
+
     const inflacionMensualNumero = Number(inflacionMensual)
-    const inflacionInteranualParsed = parsearNumeroOpcional(inflacionInteranual)
-    const promedioAnualIpcParsed = parsearNumeroOpcional(promedioAnualIpc)
-    const variacionInteranualPromedioParsed = parsearNumeroOpcional(variacionInteranualPromedio)
 
     if (
-      !mesNumero || !anioNumero || ipc.trim() === "" ||
-      Number.isNaN(ipcNumero) || inflacionMensual.trim() === "" || Number.isNaN(inflacionMensualNumero) ||
+      !ipcValido ||
+      inflacionMensual.trim() === "" || Number.isNaN(inflacionMensualNumero) ||
       !inflacionInteranualParsed.ok || !promedioAnualIpcParsed.ok || !variacionInteranualPromedioParsed.ok
     ) {
-      toast.error("Completá mes, año, IPC e inflación mensual con valores numéricos válidos.")
+      toast.error("Completá IPC e inflación mensual con valores numéricos válidos.")
       return
     }
 
     setPendiente({
-      mes: mesNumero,
-      anio: anioNumero,
+      mes: siguientePeriodo.mes,
+      anio: siguientePeriodo.anio,
       ipc: ipcNumero,
       inflacionMensual: inflacionMensualNumero,
       inflacionInteranual: inflacionInteranualParsed.valor,
@@ -71,13 +129,14 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
     guardarMutation.mutate(pendiente, {
       onSuccess: () => {
         toast.success(`Período ${MESES[pendiente.mes - 1]} ${pendiente.anio} guardado.`)
-        setMes("")
-        setAnio("")
         setIpc("")
         setInflacionMensual("")
         setInflacionInteranual("")
         setPromedioAnualIpc("")
         setVariacionInteranualPromedio("")
+        setInflacionInteranualTocado(false)
+        setPromedioAnualIpcTocado(false)
+        setVariacionInteranualPromedioTocado(false)
         setPendiente(null)
       },
       onError: () => toast.error("No se pudo guardar el período. Intentá nuevamente."),
@@ -88,40 +147,23 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="mes" className="text-sm font-semibold text-foreground">
+          <label htmlFor="mes" className="text-lg text-foreground">
             Fecha
           </label>
           {siguientePeriodo ? (
-            <div className={`${inputClassName} flex items-center bg-muted/40 text-muted-foreground`}>
+            <div id="mes" className={`${inputClassName} flex items-center bg-muted/40 text-muted-foreground`}>
               {MESES[siguientePeriodo.mes - 1]} {siguientePeriodo.anio}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              <select id="mes" value={mes} onChange={(e) => setMes(e.target.value)} className={inputClassName}>
-                <option value="" disabled>
-                  Mes
-                </option>
-                {MESES.map((nombre, i) => (
-                  <option key={nombre} value={i + 1}>
-                    {nombre}
-                  </option>
-                ))}
-              </select>
-              <input
-                id="anio"
-                type="number"
-                value={anio}
-                onChange={(e) => setAnio(e.target.value)}
-                placeholder="2026"
-                className={inputClassName}
-              />
-            </div>
+            <p className="text-sm text-red-600">
+              No se pudieron cargar los períodos existentes. Recargá la página para continuar.
+            </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="ipc" className="text-sm font-semibold text-foreground">
-            IPC
+          <label htmlFor="ipc" className="text-lg text-foreground">
+            IPC - Nivel General
           </label>
           <input
             id="ipc"
@@ -137,8 +179,8 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="inflacionMensual" className="text-sm font-semibold text-foreground">
-            Inflación mensual
+          <label htmlFor="inflacionMensual" className="text-lg text-foreground">
+            Inflación mensual - Variación %
           </label>
           <input
             id="inflacionMensual"
@@ -152,15 +194,18 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="inflacionInteranual" className="text-sm font-semibold text-foreground">
+          <label htmlFor="inflacionInteranual" className="text-lg text-foreground">
             Inflación interanual (%) — opcional
           </label>
           <input
             id="inflacionInteranual"
             type="number"
-            step="0.01"
-            value={inflacionInteranual}
-            onChange={(e) => setInflacionInteranual(e.target.value)}
+            step="0.000001"
+            value={inflacionInteranualMostrado}
+            onChange={(e) => {
+              setInflacionInteranual(e.target.value)
+              setInflacionInteranualTocado(true)
+            }}
             placeholder="85.40"
             className={inputClassName}
           />
@@ -169,37 +214,43 @@ export default function FormularioIpc({ entradas }: FormularioIpcProps) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="promedioAnualIpc" className="text-sm font-semibold text-foreground">
+          <label htmlFor="promedioAnualIpc" className="text-lg text-foreground">
             Promedio anual IPC — opcional
           </label>
           <input
             id="promedioAnualIpc"
             type="number"
-            step="0.01"
-            value={promedioAnualIpc}
-            onChange={(e) => setPromedioAnualIpc(e.target.value)}
+            step="0.000001"
+            value={promedioAnualIpcMostrado}
+            onChange={(e) => {
+              setPromedioAnualIpc(e.target.value)
+              setPromedioAnualIpcTocado(true)
+            }}
             placeholder="98.30"
             className={inputClassName}
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="variacionInteranualPromedio" className="text-sm font-semibold text-foreground">
+          <label htmlFor="variacionInteranualPromedio" className="text-lg text-foreground">
             Variación interanual promedio (%) — opcional
           </label>
           <input
             id="variacionInteranualPromedio"
             type="number"
-            step="0.01"
-            value={variacionInteranualPromedio}
-            onChange={(e) => setVariacionInteranualPromedio(e.target.value)}
+            step="0.000001"
+            value={variacionInteranualPromedioMostrado}
+            onChange={(e) => {
+              setVariacionInteranualPromedio(e.target.value)
+              setVariacionInteranualPromedioTocado(true)
+            }}
             placeholder="78.20"
             className={inputClassName}
           />
         </div>
       </div>
 
-      <Button type="submit" disabled={guardarMutation.isPending}>
+      <Button type="submit" disabled={!siguientePeriodo || guardarMutation.isPending}>
         {guardarMutation.isPending ? "Guardando..." : "Guardar período"}
       </Button>
 

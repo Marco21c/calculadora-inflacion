@@ -7,7 +7,7 @@ interface EgresoProps {
 
 export default function Egreso({ resultado }: EgresoProps) {
   return (
-    <div className="flex h-full w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <h2 className="text-sm font-semibold text-foreground">Resultado:</h2>
 
       <p className="text-3xl font-bold text-blue-900/80">
