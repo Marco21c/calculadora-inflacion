@@ -55,13 +55,39 @@ export function construirOptionVariacionMensual(entradas: IpcEntry[]): EChartsOp
 
 // Sparkline: sin ejes ni grilla visibles, con el mismo hover (tooltip +
 // crosshair) que el gráfico grande — así se puede ver el valor de cualquier
-// mes sin amontonar labels fijos cuando el período es largo.
+// mes sin amontonar labels fijos cuando el período es largo. Los únicos
+// labels fijos son los de los extremos (primer y último mes del período).
 export function construirOptionSparklineMensual(entradas: IpcEntry[]): EChartsOption {
   const categorias = entradas.map((entrada) => `${MESES_ABREVIADOS[entrada.mes - 1]} ${entrada.anio}`)
   const valores = entradas.map((entrada) => Number((entrada.inflacionMensual * 100).toFixed(1)))
+  const ultimoIndice = valores.length - 1
+
+  const datos = valores.map((valor, indice) => {
+    const esExtremo = indice === 0 || indice === ultimoIndice
+    // "left"/"right" en vez de "top": así el label queda centrado en la
+    // misma altura que el punto, adentro del margen reservado del grid
+    // (left/right más abajo), en vez de arriba del punto — que se cortaba
+    // cuando el valor quedaba cerca del techo del eje Y (pasaba justo con
+    // el último mes cuando era el pico del período).
+    const posicion: "left" | "right" = indice === 0 ? "left" : "right"
+    return {
+      value: valor,
+      label: esExtremo
+        ? {
+            show: true,
+            position: posicion,
+            align: posicion,
+            formatter: () => `${categorias[indice]}\n${valor.toFixed(1)}%`,
+            fontSize: 11,
+            lineHeight: 14,
+            color: COLOR_MUTED,
+          }
+        : { show: false },
+    }
+  })
 
   return {
-    grid: { left: 12, right: 12, top: 12, bottom: 4 },
+    grid: { left: 58, right: 58, top: 20, bottom: 20 },
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "line" },
@@ -73,10 +99,12 @@ export function construirOptionSparklineMensual(entradas: IpcEntry[]): EChartsOp
     series: [
       {
         type: "line",
-        data: valores,
+        data: datos,
         lineStyle: { color: COLOR_SERIE, width: 2 },
         itemStyle: { color: COLOR_SERIE },
-        showSymbol: false,
+        symbol: "circle",
+        symbolSize: (_valor: unknown, params: { dataIndex: number }) =>
+          params.dataIndex === 0 || params.dataIndex === ultimoIndice ? 6 : 0,
         areaStyle: { color: COLOR_SERIE, opacity: 0.1 },
       },
     ],

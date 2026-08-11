@@ -14,7 +14,7 @@ function PublicApp() {
         <Route
           path="/calculadora"
           element={
-            <div className="mx-auto my-6 max-w-6xl py-4">
+            <div className="mx-auto my-6 max-w-6xl px-4 py-4 sm:px-6">
               <Calculadora />
             </div>
           }

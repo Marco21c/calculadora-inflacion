@@ -90,6 +90,11 @@ export default function Ingreso({
   )
 
   const mesesDeshabilitadosInicio = useMemo(() => {
+    // Mientras ipcData todavía no cargó (React Query en curso), no hay que
+    // tratar "sin datos todavía" como "ningún mes disponible": eso marcaría
+    // como inválido cualquier mes ya seleccionado (incluido el valor por
+    // defecto) antes de que lleguen los datos reales.
+    if (ipcData.length === 0) return []
     const disponibles = anioInicio ? getMesesDisponibles(ipcData, anioInicio) : []
     return opcionesMeses
       .map((o) => o.value)
@@ -101,6 +106,7 @@ export default function Ingreso({
   }, [ipcData, anioInicio, anioFin, mesFin, opcionesMeses])
 
   const mesesDeshabilitadosFin = useMemo(() => {
+    if (ipcData.length === 0) return []
     const disponibles = anioFin ? getMesesDisponibles(ipcData, anioFin) : []
     return opcionesMeses
       .map((o) => o.value)

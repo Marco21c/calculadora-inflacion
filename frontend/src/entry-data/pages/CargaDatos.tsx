@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { toast } from "sonner"
 import type { IpcEntry } from "@/interfaces/ipc"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Loader from "@/components/Loader"
 import logo from '@/assets/logo.png'
 import FormularioIpc from "../components/FormularioIpc"
 import TablaIpc from "../components/TablaIpc"
@@ -54,7 +55,7 @@ export default function CargaDatos() {
               <h2 className="text-base font-semibold text-foreground">Datos ingresados:</h2>
 
               {cargando ? (
-                <p className="text-sm text-muted-foreground">Cargando...</p>
+                <Loader label="Cargando..." />
               ) : (
                 <TablaIpc entradas={entradas} soloLectura alturaMaxima={300} />
               )}
@@ -72,7 +73,7 @@ export default function CargaDatos() {
           <div className="flex flex-col gap-4 mt-4  rounded-2xl px-10 py-14 border border-2 border-muted-foreground/20">
              <p className="text-red-400/40 text-sm text-foreground border-b border-muted-foreground/20 p-2"> (*) Revisar datos antes de guardar </p>
             {cargando ? (
-              <p className="text-sm text-muted-foreground">Cargando...</p>
+              <Loader label="Cargando..." />
             ) : (
               <TablaIpc entradas={entradas} alturaMaxima={560}/>
             )}

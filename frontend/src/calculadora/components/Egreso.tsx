@@ -10,13 +10,13 @@ export default function Egreso({ resultado }: EgresoProps) {
     <div className="flex w-full flex-col gap-4">
       <h2 className="text-sm font-semibold text-foreground">Resultado:</h2>
 
-      <p className="text-3xl font-bold text-blue-900/80">
+      <p className="text-2xl font-bold text-blue-900/80 break-words sm:text-3xl">
         {formatoMoneda(resultado?.montoFinal ?? 0)}
       </p>
 
       {!resultado ? (
         <p className="text-sm text-muted-foreground">
-          Completá el monto y el período para ver el resultado.
+          Completá el período para ver el resultado.
         </p>
       ) : (
         <>
@@ -24,7 +24,7 @@ export default function Egreso({ resultado }: EgresoProps) {
             <p className=" text-foreground">
               La inflación acumulada para el período especificado fue de:
             </p>
-            <p className="text-2xl font-bold text-red-600">
+            <p className="text-xl font-bold text-red-600 sm:text-2xl">
               {formatoPorcentaje(resultado.inflacionAcumulada)}
             </p>
           </div>
@@ -34,7 +34,7 @@ export default function Egreso({ resultado }: EgresoProps) {
               <p className="text-foreground">
                 La inflación interanual del período {resultado.periodoInteranual} fue de:
               </p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-xl font-bold text-red-600 sm:text-2xl">
                 {formatoPorcentaje(resultado.inflacionInteranual)}
               </p>
             </div>

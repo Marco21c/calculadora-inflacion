@@ -49,10 +49,19 @@ export function getEntradasDelPeriodo(ipcData: IpcEntry[], params: PeriodoParams
   const indices = encontrarIndicesPeriodo(ipcData, params)
   if (!indices) return []
   const { indiceInicio, indiceFin } = indices
+
   // Si el período elegido tiene menos meses que el mínimo, se extiende hacia
   // atrás (meses anteriores a mesInicio) para completarlo.
   const indiceInicioAjustado = Math.max(0, Math.min(indiceInicio, indiceFin - minimoMeses + 1))
-  return ipcData.slice(indiceInicioAjustado, indiceFin + 1)
+
+  // Si mesInicio ya es el primer dato cargado, no hay para dónde extenderse
+  // hacia atrás: el faltante se completa hacia adelante (meses posteriores a
+  // mesFin) para no mostrar menos meses que el mínimo pedido.
+  const mesesFaltantes = minimoMeses - (indiceFin - indiceInicioAjustado + 1)
+  const indiceFinAjustado =
+    mesesFaltantes > 0 ? Math.min(ipcData.length - 1, indiceFin + mesesFaltantes) : indiceFin
+
+  return ipcData.slice(indiceInicioAjustado, indiceFinAjustado + 1)
 }
 
 // Inflación interanual de un mes: IPC de ese mes contra el IPC del mismo mes

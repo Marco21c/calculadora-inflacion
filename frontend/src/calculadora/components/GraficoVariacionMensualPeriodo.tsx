@@ -13,8 +13,8 @@ export default function GraficoVariacionMensualPeriodo({ entradas }: GraficoVari
   const option = construirOptionSparklineMensual(entradas)
 
   return (
-    <div className="rounded-2xl border border-border ">
-      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 130 }} notMerge />
+    <div >
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 120 }} notMerge />
     </div>
   )
 }
