@@ -8,7 +8,7 @@ interface EgresoProps {
 export default function Egreso({ resultado }: EgresoProps) {
   return (
     <div className="flex w-full flex-col gap-4">
-      <h2 className="text-sm font-semibold text-foreground">Resultado:</h2>
+      <h2 className="font-semibold text-foreground">Resultado:</h2>
 
       <p className="text-2xl font-bold text-blue-900/80 break-words sm:text-3xl">
         {formatoMoneda(resultado?.montoFinal ?? 0)}

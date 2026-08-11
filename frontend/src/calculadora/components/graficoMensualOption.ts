@@ -62,32 +62,17 @@ export function construirOptionSparklineMensual(entradas: IpcEntry[]): EChartsOp
   const valores = entradas.map((entrada) => Number((entrada.inflacionMensual * 100).toFixed(1)))
   const ultimoIndice = valores.length - 1
 
-  const datos = valores.map((valor, indice) => {
-    const esExtremo = indice === 0 || indice === ultimoIndice
-    // "left"/"right" en vez de "top": así el label queda centrado en la
-    // misma altura que el punto, adentro del margen reservado del grid
-    // (left/right más abajo), en vez de arriba del punto — que se cortaba
-    // cuando el valor quedaba cerca del techo del eje Y (pasaba justo con
-    // el último mes cuando era el pico del período).
-    const posicion: "left" | "right" = indice === 0 ? "left" : "right"
-    return {
-      value: valor,
-      label: esExtremo
-        ? {
-            show: true,
-            position: posicion,
-            align: posicion,
-            formatter: () => `${categorias[indice]}\n${valor.toFixed(1)}%`,
-            fontSize: 11,
-            lineHeight: 14,
-            color: COLOR_MUTED,
-          }
-        : { show: false },
-    }
-  })
+  // Texto de los extremos como "graphic" con posición fija en píxeles
+  // (esquinas del contenedor), en vez de label pegado al punto: si el
+  // label sigue la altura del dato, con rangos grandes (más variación de
+  // valores) el extremo puede terminar muy cerca del techo o el piso del
+  // eje Y y el label se corta contra el borde del gráfico. Fijo siempre
+  // se ve, sin importar dónde caiga el punto verticalmente.
+  const textoPrimero = `${categorias[0]}\n${valores[0].toFixed(1)}%`
+  const textoUltimo = `${categorias[ultimoIndice]}\n${valores[ultimoIndice].toFixed(1)}%`
 
   return {
-    grid: { left: 58, right: 58, top: 20, bottom: 20 },
+    grid: { left: 12, right: 12, top: 24, bottom: 4 },
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "line" },
@@ -96,10 +81,26 @@ export function construirOptionSparklineMensual(entradas: IpcEntry[]): EChartsOp
     },
     xAxis: { type: "category", data: categorias, show: false, boundaryGap: false },
     yAxis: { type: "value", show: false },
+    graphic: {
+      elements: [
+        {
+          type: "text",
+          left: 4,
+          top: 2,
+          style: { text: textoPrimero, fontSize: 11, lineHeight: 14, fill: COLOR_MUTED, align: "left" },
+        },
+        {
+          type: "text",
+          right: 4,
+          top: 2,
+          style: { text: textoUltimo, fontSize: 11, lineHeight: 14, fill: COLOR_MUTED, align: "right" },
+        },
+      ],
+    },
     series: [
       {
         type: "line",
-        data: datos,
+        data: valores,
         lineStyle: { color: COLOR_SERIE, width: 2 },
         itemStyle: { color: COLOR_SERIE },
         symbol: "circle",
