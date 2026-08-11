@@ -1,0 +1,7 @@
+[build]
+  command = "npm run build:public"
+  publish = "dist-public"
+
+# Las reglas de proxy /api/* y el fallback de SPA ya están en
+# frontend/public/_redirects (Vite lo copia a dist-public/_redirects) — no
+# se duplican acá para evitar reglas repetidas.
