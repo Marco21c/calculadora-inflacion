@@ -2,6 +2,7 @@ import './App.css'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Calculadora from './calculadora/pages/Calculadora'
 import CargaDatos from './entry-data/pages/CargaDatos'
+import NotFound from '@/components/NotFound'
 import { Toaster } from '@/components/ui/sonner'
 import LayoutConSidebar from '@/components/LayoutConSidebar'
 
@@ -16,6 +17,8 @@ function AdminApp() {
           <Route index element={<Calculadora />} />
           <Route path="ingreso" element={<CargaDatos />} />
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
     </>

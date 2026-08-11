@@ -1,6 +1,7 @@
 import './App.css'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Calculadora from './calculadora/pages/Calculadora'
+import NotFound from '@/components/NotFound'
 import { Toaster } from '@/components/ui/sonner'
 
 // Build público (VPS): solo la calculadora. No importa nada de entry-data/,
@@ -18,6 +19,7 @@ function PublicApp() {
             </div>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
     </>
