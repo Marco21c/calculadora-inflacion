@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-public
+dist-admin
 *.local
 
 # Variables de entorno con credenciales (DB, etc.)

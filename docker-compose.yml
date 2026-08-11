@@ -1,44 +1,16 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-inflacion}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
-      POSTGRES_DB: ${POSTGRES_DB:-inflacion}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-inflacion}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      # Sin pooler: en un Postgres local, DATABASE_URL y DIRECT_URL son la misma.
-      DATABASE_URL: postgresql://${POSTGRES_USER:-inflacion}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-inflacion}
-      DIRECT_URL: postgresql://${POSTGRES_USER:-inflacion}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-inflacion}
-      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost}
-      NODE_ENV: production
-      PORT: "3001"
-
+  # Solo sirve el frontend público (/calculadora). El backend vive en Vercel
+  # (junto con Supabase), y el admin (carga/edición de datos) se despliega
+  # aparte, también en Vercel — ver frontend/vercel.json. Este VPS no
+  # necesita Postgres ni backend propios.
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
     restart: unless-stopped
-    depends_on:
-      - backend
+    environment:
+      # URL pública del backend en Vercel, sin barra final. nginx la usa
+      # para proxear /api/* (ver frontend/nginx.conf.template).
+      BACKEND_URL: "${BACKEND_URL:?falta BACKEND_URL en .env, ej https://tu-backend.vercel.app}"
     ports:
       - "${HTTP_PORT:-80}:80"
-
-volumes:
-  db_data:

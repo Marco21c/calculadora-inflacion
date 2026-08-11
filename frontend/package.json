@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run build:public",
+    "build:public": "tsc -b && vite build",
+    "build:admin": "tsc -b && vite build --mode admin",
     "lint": "eslint .",
     "preview": "vite preview"
   },

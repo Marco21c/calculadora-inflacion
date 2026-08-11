@@ -1,0 +1,36 @@
+server {
+    listen 80;
+    server_name _;
+
+    # Resuelve DNS del backend en tiempo de request (no una sola vez al
+    # arrancar), porque Vercel puede cambiar de IP detrás del hostname.
+    resolver 1.1.1.1 8.8.8.8 valid=60s;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location /api/ {
+        # BACKEND_URL se reemplaza al arrancar el contenedor (envsubst sobre
+        # este template, ver Dockerfile). Ej: https://mi-backend.vercel.app
+        #
+        # Sin URI después de la variable a propósito: con proxy_pass
+        # dinámico (variable) nginx NO hace el reemplazo automático de la
+        # ruta — si le agregás un path acá, lo manda literal y tira el
+        # resto del path original. Dejando solo la variable, reenvía la URL
+        # completa del cliente tal cual (p. ej. /api/ipc-entries).
+        set $backend "${BACKEND_URL}";
+        proxy_pass $backend;
+        proxy_ssl_server_name on;
+        # Host tiene que ser el del backend (no el del cliente): Vercel
+        # rutea al deployment según ese header, no según la URL del path.
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SPA: cualquier ruta que no sea un archivo real cae en index.html.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
