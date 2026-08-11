@@ -46,16 +46,16 @@ export default function Calculadora() {
   const variacionAnual = useMemo(() => getVariacionAnual(data), [data])
 
   return (
-    <div >
-         <div className='flex flex-col gap-3 mb-2 sm:flex-row sm:items-center sm:justify-between'  >
-              <h1 className='text-2xl font-bold text-blue-900/80 sm:text-3xl'>
+    <div className="p-4 sm:p-6 md:p-8">
+         <div className='flex flex-row items-center justify-between gap-3 mb-2'  >
+              <h1 className='min-w-0 text-lg font-bold text-blue-900/80 sm:text-2xl md:text-3xl'>
                CALCULADORA DE INFLACIÓN
              </h1>
 
-             <img src={logo} alt="Logo" title="Dipec" className="w-20 self-start sm:w-26 sm:self-auto" />
+             <img src={logo} alt="Logo" title="Dipec" className="w-14 shrink-0 sm:w-20 md:w-26" />
           </div>
        <div className='mb-10 flex justify-start'>
-        <p className='max-w-2xl text-left text-semibold'>Esta herramienta le permite calcular la inflación acumulada para un determinado período,
+        <p className='max-w-2xl text-xs md:text-base text-left text-semibold'>Esta herramienta le permite calcular la inflación acumulada para un determinado período,
           en base al Índice de Precios al Consumidor (IPC) de San Salvador de Jujuy.</p>
        </div>
 
