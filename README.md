@@ -102,13 +102,13 @@ npm run build:admin -w frontend    # panel de admin, para Vercel
 
 ## Despliegue
 
-Son **tres despliegues independientes**, sin base de datos ni backend propios en el VPS:
+Son **tres despliegues independientes**. El público (`/calculadora`) puede ir a un VPS propio (Docker + nginx) o a Cloudflare Pages — ninguno de los dos necesita base de datos ni backend propios, solo proxean `/api/*` al backend de Vercel.
 
-| Qué                     | Dónde                       | Config                       |
-| ------------------------ | ---------------------------- | ------------------------------ |
-| Backend + Postgres        | Vercel (serverless) + Supabase | `backend/vercel.json`         |
-| Admin (`/administrador`) | Vercel                        | `frontend/vercel.json`        |
-| Público (`/calculadora`) | VPS, vía Docker + nginx       | `docker-compose.yml` (raíz)    |
+| Qué                     | Dónde                                    | Config                       |
+| ------------------------ | ------------------------------------------ | ------------------------------ |
+| Backend + Postgres        | Vercel (serverless) + Supabase           | `backend/vercel.json`         |
+| Admin (`/administrador`) | Vercel                                    | `frontend/vercel.json`        |
+| Público (`/calculadora`) | VPS (Docker + nginx) **o** Cloudflare Pages | `docker-compose.yml` / `frontend/public/_redirects` |
 
 ### Backend (Vercel)
 
@@ -138,3 +138,22 @@ docker compose up -d --build
 Esto construye una imagen de nginx que sirve el build público (`dist-public/`) y proxea `/api/*` al backend de Vercel — el navegador ve todo como same-origin, sin CORS de por medio. El sitio queda en `http://<ip-del-vps>:${HTTP_PORT:-80}/calculadora`.
 
 Para bajarlo: `docker compose down` (o `down -v` si además se quiere borrar cualquier estado).
+
+### Público (Cloudflare Pages) — alternativa al VPS
+
+Mismo build (`dist-public/`), sin Docker ni servidor propio: Cloudflare Pages sirve el estático directo. El equivalente al proxy de nginx es `frontend/public/_redirects` (Vite lo copia tal cual a `dist-public/_redirects` en el build):
+
+```
+/api/*  https://calculadora-inflacion-backend-one.vercel.app/api/:splat  200
+/*      /index.html                                                       200
+```
+
+La primera regla proxea `/api/*` al backend de Vercel (el `200` al final hace que Cloudflare lo trate como proxy, no como redirect — el navegador nunca ve la URL de Vercel). La segunda es el fallback de SPA, para que rutas como `/calculadora` no den 404 al refrescar la página.
+
+Configuración del proyecto en el dashboard de Cloudflare Pages:
+
+- **Root directory**: `frontend`
+- **Build command**: `npm run build:public`
+- **Build output directory**: `dist-public`
+
+Si el backend de Vercel cambia de URL, hay que actualizar la primera línea de `frontend/public/_redirects` y volver a deployar.

@@ -1,0 +1,5 @@
+/api/*  https://calculadora-inflacion-backend-one.vercel.app/api/:splat  200
+
+# SPA: cualquier ruta que no sea /api/* ni un archivo real cae en index.html
+# (React Router maneja el resto del lado del cliente).
+/*      /index.html                                                       200
