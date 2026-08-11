@@ -4,7 +4,7 @@
     "mes": 1,
     "ipc": 0.9143,
     "inflacionMensual": 0.023,
-    "inflacionInteranual": 31.2,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -13,7 +13,7 @@
     "mes": 2,
     "ipc": 0.924,
     "inflacionMensual": 0.011,
-    "inflacionInteranual": 28.4,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -22,7 +22,7 @@
     "mes": 3,
     "ipc": 0.9509,
     "inflacionMensual": 0.029,
-    "inflacionInteranual": 29.4,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -31,7 +31,7 @@
     "mes": 4,
     "ipc": 0.9846,
     "inflacionMensual": 0.035,
-    "inflacionInteranual": 28.4,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -40,7 +40,7 @@
     "mes": 5,
     "ipc": 0.9962,
     "inflacionMensual": 0.012,
-    "inflacionInteranual": 26,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -49,7 +49,7 @@
     "mes": 6,
     "ipc": 1.0059,
     "inflacionMensual": 0.01,
-    "inflacionInteranual": 22.7,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -58,7 +58,7 @@
     "mes": 7,
     "ipc": 1.0104,
     "inflacionMensual": 0.004,
-    "inflacionInteranual": 19.5,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -67,7 +67,7 @@
     "mes": 8,
     "ipc": 1.0234,
     "inflacionMensual": 0.013,
-    "inflacionInteranual": 21.8,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -76,7 +76,7 @@
     "mes": 9,
     "ipc": 1.0342,
     "inflacionMensual": 0.011,
-    "inflacionInteranual": 21.6,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -85,7 +85,7 @@
     "mes": 10,
     "ipc": 1.0431,
     "inflacionMensual": 0.009,
-    "inflacionInteranual": 19.5,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -94,7 +94,7 @@
     "mes": 11,
     "ipc": 1.0582,
     "inflacionMensual": 0.014,
-    "inflacionInteranual": 19.7,
+    "inflacionInteranual": null,
     "promedioAnualIpc": null,
     "variacionInteranualPromedio": null
   },
@@ -103,17 +103,17 @@
     "mes": 12,
     "ipc": 1.0867,
     "inflacionMensual": 0.027,
-    "inflacionInteranual": 21.6,
-    "promedioAnualIpc": 1.00265833333333,
-    "variacionInteranualPromedio": 24.15
+    "inflacionInteranual": null,
+    "promedioAnualIpc": 1.0026583333333334,
+    "variacionInteranualPromedio": null
   },
   {
     "anio": 2018,
     "mes": 1,
     "ipc": 1.1062,
     "inflacionMensual": 0.018,
-    "inflacionInteranual": 21,
-    "promedioAnualIpc": 1.01865,
+    "inflacionInteranual": 20.98873455102266,
+    "promedioAnualIpc": 1.0186499999999998,
     "variacionInteranualPromedio": null
   },
   {
@@ -121,8 +121,8 @@
     "mes": 2,
     "ipc": 1.1324,
     "inflacionMensual": 0.024,
-    "inflacionInteranual": 22.5,
-    "promedioAnualIpc": 1.03601666666667,
+    "inflacionInteranual": 22.55411255411255,
+    "promedioAnualIpc": 1.0360166666666666,
     "variacionInteranualPromedio": null
   },
   {
@@ -130,8 +130,8 @@
     "mes": 3,
     "ipc": 1.1609,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": 22.1,
-    "promedioAnualIpc": 1.05351666666667,
+    "inflacionInteranual": 22.084341150489028,
+    "promedioAnualIpc": 1.0535166666666667,
     "variacionInteranualPromedio": null
   },
   {
@@ -139,8 +139,8 @@
     "mes": 4,
     "ipc": 1.187,
     "inflacionMensual": 0.023,
-    "inflacionInteranual": 20.6,
-    "promedioAnualIpc": 1.07038333333333,
+    "inflacionInteranual": 20.556571196424954,
+    "promedioAnualIpc": 1.0703833333333332,
     "variacionInteranualPromedio": null
   },
   {
@@ -148,8 +148,8 @@
     "mes": 5,
     "ipc": 1.2242,
     "inflacionMensual": 0.031,
-    "inflacionInteranual": 22.9,
-    "promedioAnualIpc": 1.08938333333333,
+    "inflacionInteranual": 22.88697048785384,
+    "promedioAnualIpc": 1.0893833333333334,
     "variacionInteranualPromedio": null
   },
   {
@@ -157,16 +157,16 @@
     "mes": 6,
     "ipc": 1.2656,
     "inflacionMensual": 0.034,
-    "inflacionInteranual": 25.8,
+    "inflacionInteranual": 25.81767571329159,
     "promedioAnualIpc": 1.111025,
-    "variacionInteranualPromedio": 21.55
+    "variacionInteranualPromedio": null
   },
   {
     "anio": 2018,
     "mes": 7,
     "ipc": 1.3167,
     "inflacionMensual": 0.04,
-    "inflacionInteranual": 30.3,
+    "inflacionInteranual": 30.3147268408551,
     "promedioAnualIpc": 1.13655,
     "variacionInteranualPromedio": null
   },
@@ -175,8 +175,8 @@
     "mes": 8,
     "ipc": 1.3649,
     "inflacionMensual": 0.037,
-    "inflacionInteranual": 33.4,
-    "promedioAnualIpc": 1.16500833333333,
+    "inflacionInteranual": 33.369161618135614,
+    "promedioAnualIpc": 1.1650083333333334,
     "variacionInteranualPromedio": null
   },
   {
@@ -184,845 +184,845 @@
     "mes": 9,
     "ipc": 1.4493,
     "inflacionMensual": 0.062,
-    "inflacionInteranual": 40.1,
-    "promedioAnualIpc": 1.1996,
+    "inflacionInteranual": 40.137304196480386,
+    "promedioAnualIpc": 1.1996000000000002,
     "variacionInteranualPromedio": null
   },
   {
     "anio": 2018,
     "mes": 10,
-    "ipc": 9494979873.1,
+    "ipc": 1.5149,
     "inflacionMensual": 0.045,
-    "inflacionInteranual": null,
-    "promedioAnualIpc": 7765247076.3,
+    "inflacionInteranual": 45.23056274566197,
+    "promedioAnualIpc": 1.2389166666666667,
     "variacionInteranualPromedio": null
   },
   {
     "anio": 2018,
     "mes": 11,
-    "ipc": 9928565022.8,
+    "ipc": 1.5841,
     "inflacionMensual": 0.046,
-    "inflacionInteranual": null,
-    "promedioAnualIpc": 8039897687.1,
+    "inflacionInteranual": 49.697599697599706,
+    "promedioAnualIpc": 1.2827416666666667,
     "variacionInteranualPromedio": null
   },
   {
     "anio": 2018,
     "mes": 12,
-    "ipc": 10173606636.7,
+    "ipc": 1.6232,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": null,
-    "promedioAnualIpc": 8320105620.5,
-    "variacionInteranualPromedio": 31.92
+    "inflacionInteranual": 49.3696512376921,
+    "promedioAnualIpc": 1.32745,
+    "variacionInteranualPromedio": 31.917284332468288
   },
   {
     "anio": 2019,
     "mes": 1,
-    "ipc": 10461213124.6,
+    "ipc": 1.669,
     "inflacionMensual": 0.028,
-    "inflacionInteranual": 50.9,
-    "promedioAnualIpc": 8614070258.6,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 50.8768757909962,
+    "promedioAnualIpc": 1.37435,
+    "variacionInteranualPromedio": 34.40796276913275
   },
   {
     "anio": 2019,
     "mes": 2,
-    "ipc": 10868868352.5,
+    "ipc": 1.7341,
     "inflacionMensual": 0.039,
-    "inflacionInteranual": 53.1,
-    "promedioAnualIpc": 8928361796.6,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 53.1349346520664,
+    "promedioAnualIpc": 1.4244916666666667,
+    "variacionInteranualPromedio": 36.95636461062891
   },
   {
     "anio": 2019,
     "mes": 3,
-    "ipc": 11392611522.3,
+    "ipc": 1.8176,
     "inflacionMensual": 0.048,
-    "inflacionInteranual": 56.6,
-    "promedioAnualIpc": 9271395055.6,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 56.56817986045311,
+    "promedioAnualIpc": 1.4792166666666666,
+    "variacionInteranualPromedio": 39.83001783645925
   },
   {
     "anio": 2019,
     "mes": 4,
-    "ipc": 11826751987,
+    "ipc": 1.8869,
     "inflacionMensual": 0.038,
-    "inflacionInteranual": 59,
-    "promedioAnualIpc": 9636959334.6,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 58.96377422072452,
+    "promedioAnualIpc": 1.5375416666666668,
+    "variacionInteranualPromedio": 43.03061808848421
   },
   {
     "anio": 2019,
     "mes": 5,
-    "ipc": 12117531601.4,
+    "ipc": 1.9333,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": 57.9,
-    "promedioAnualIpc": 10007357898.2,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 57.923541904917506,
+    "promedioAnualIpc": 1.5966333333333333,
+    "variacionInteranualPromedio": 45.950332373239526
   },
   {
     "anio": 2019,
     "mes": 6,
-    "ipc": 12424859612.9,
+    "ipc": 1.9823,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": 56.6,
-    "promedioAnualIpc": 10381723971.4,
-    "variacionInteranualPromedio": 48.52
+    "inflacionInteranual": 56.62926675094815,
+    "promedioAnualIpc": 1.6563583333333334,
+    "variacionInteranualPromedio": 48.5179649597109
   },
   {
     "anio": 2019,
     "mes": 7,
-    "ipc": 12648710328.2,
+    "ipc": 2.0181,
     "inflacionMensual": 0.018,
-    "inflacionInteranual": 53.3,
-    "promedioAnualIpc": 10748037184.5,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 53.2695374800638,
+    "promedioAnualIpc": 1.7148083333333333,
+    "variacionInteranualPromedio": 50.430865846311626
   },
   {
     "anio": 2019,
     "mes": 8,
-    "ipc": 13251433953,
+    "ipc": 2.1142,
     "inflacionMensual": 0.048,
-    "inflacionInteranual": 54.9,
-    "promedioAnualIpc": 11139401468.2,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 54.89779471023517,
+    "promedioAnualIpc": 1.7772500000000002,
+    "variacionInteranualPromedio": 52.22491860398659
   },
   {
     "anio": 2019,
     "mes": 9,
-    "ipc": 13938717124.1,
+    "ipc": 2.2239,
     "inflacionMensual": 0.052,
-    "inflacionInteranual": 53.4,
-    "promedioAnualIpc": 11543987428.2,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 53.446491409646036,
+    "promedioAnualIpc": 1.8418,
+    "variacionInteranualPromedio": 53.33401753841705
   },
   {
     "anio": 2019,
     "mes": 10,
-    "ipc": 14201559870.5,
+    "ipc": 2.2658,
     "inflacionMensual": 0.019,
-    "inflacionInteranual": 49.6,
-    "promedioAnualIpc": 11936202428,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 49.56762822628558,
+    "promedioAnualIpc": 1.904375,
+    "variacionInteranualPromedio": 53.69543966180236
   },
   {
     "anio": 2019,
     "mes": 11,
-    "ipc": 14781431649.8,
+    "ipc": 2.3583,
     "inflacionMensual": 0.041,
-    "inflacionInteranual": 48.9,
-    "promedioAnualIpc": 12340607980.2,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 48.87317719840918,
+    "promedioAnualIpc": 1.9688916666666667,
+    "variacionInteranualPromedio": 53.62673778686982
   },
   {
     "anio": 2019,
     "mes": 12,
-    "ipc": 15249737380,
+    "ipc": 2.433,
     "inflacionMensual": 0.032,
-    "inflacionInteranual": 49.9,
-    "promedioAnualIpc": 12763618875.5,
-    "variacionInteranualPromedio": 53.68
+    "inflacionInteranual": 49.889107934943326,
+    "promedioAnualIpc": 2.036375,
+    "variacionInteranualPromedio": 53.67002584497408
   },
   {
     "anio": 2020,
     "mes": 1,
-    "ipc": 15671146917.8,
+    "ipc": 2.5003,
     "inflacionMensual": 0.028,
-    "inflacionInteranual": 49.8,
-    "promedioAnualIpc": 13197780024.9,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 49.80826842420611,
+    "promedioAnualIpc": 2.1056500000000002,
+    "variacionInteranualPromedio": 53.580975231074916
   },
   {
     "anio": 2020,
     "mes": 2,
-    "ipc": 15991601927.3,
+    "ipc": 2.5514,
     "inflacionMensual": 0.02,
-    "inflacionInteranual": 47.1,
-    "promedioAnualIpc": 13624674489.5,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 47.131076639178836,
+    "promedioAnualIpc": 2.1737583333333332,
+    "variacionInteranualPromedio": 53.08065373000093
   },
   {
     "anio": 2020,
     "mes": 3,
-    "ipc": 16725295494.1,
+    "ipc": 2.6685,
     "inflacionMensual": 0.046,
-    "inflacionInteranual": 46.8,
-    "promedioAnualIpc": 14069064820.5,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 46.8144806338028,
+    "promedioAnualIpc": 2.244666666666667,
+    "variacionInteranualPromedio": 52.26784546111341
   },
   {
     "anio": 2020,
     "mes": 4,
-    "ipc": 17063722993.8,
+    "ipc": 2.7225,
     "inflacionMensual": 0.02,
-    "inflacionInteranual": 44.3,
-    "promedioAnualIpc": 14505479071.1,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 44.28427579627963,
+    "promedioAnualIpc": 2.3143000000000002,
+    "variacionInteranualPromedio": 51.04455392574301
   },
   {
     "anio": 2020,
     "mes": 5,
     "ipc": 2.7569,
     "inflacionMensual": 0.013,
-    "inflacionInteranual": 42.6,
-    "promedioAnualIpc": 2.38293333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 42.60073449542232,
+    "promedioAnualIpc": 2.3829333333333333,
+    "variacionInteranualPromedio": 49.76765330828508
   },
   {
     "anio": 2020,
     "mes": 6,
     "ipc": 2.7877,
     "inflacionMensual": 0.011,
-    "inflacionInteranual": 40.6,
-    "promedioAnualIpc": 2.45005,
-    "variacionInteranualPromedio": 48.43
+    "inflacionInteranual": 40.62957170963024,
+    "promedioAnualIpc": 2.4500499999999996,
+    "variacionInteranualPromedio": 48.434345388175245
   },
   {
     "anio": 2020,
     "mes": 7,
     "ipc": 2.8166,
     "inflacionMensual": 0.01,
-    "inflacionInteranual": 39.6,
-    "promedioAnualIpc": 2.51659166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 39.5669193796145,
+    "promedioAnualIpc": 2.516591666666667,
+    "variacionInteranualPromedio": 47.292460546471155
   },
   {
     "anio": 2020,
     "mes": 8,
     "ipc": 2.8593,
     "inflacionMensual": 0.015,
-    "inflacionInteranual": 35.2,
-    "promedioAnualIpc": 2.57868333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 35.24264497209349,
+    "promedioAnualIpc": 2.578683333333333,
+    "variacionInteranualPromedio": 45.654531401626
   },
   {
     "anio": 2020,
     "mes": 9,
     "ipc": 2.9316,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": 31.8,
-    "promedioAnualIpc": 2.63765833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 31.822474032105763,
+    "promedioAnualIpc": 2.637658333333334,
+    "variacionInteranualPromedio": 43.85252995349765
   },
   {
     "anio": 2020,
     "mes": 10,
     "ipc": 3.0638,
     "inflacionMensual": 0.045,
-    "inflacionInteranual": 35.2,
-    "promedioAnualIpc": 2.70415833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 35.21934857445495,
+    "promedioAnualIpc": 2.7041583333333334,
+    "variacionInteranualPromedio": 42.65683998251176
   },
   {
     "anio": 2020,
     "mes": 11,
     "ipc": 3.2123,
     "inflacionMensual": 0.048,
-    "inflacionInteranual": 36.2,
-    "promedioAnualIpc": 2.775325,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 36.21252597209854,
+    "promedioAnualIpc": 2.7753250000000005,
+    "variacionInteranualPromedio": 41.601785713652546
   },
   {
     "anio": 2020,
     "mes": 12,
     "ipc": 3.394,
     "inflacionMensual": 0.057,
-    "inflacionInteranual": 39.5,
-    "promedioAnualIpc": 2.85540833333333,
-    "variacionInteranualPromedio": 40.73
+    "inflacionInteranual": 39.49856144677355,
+    "promedioAnualIpc": 2.8554083333333335,
+    "variacionInteranualPromedio": 40.735906839638396
   },
   {
     "anio": 2021,
     "mes": 1,
     "ipc": 3.5967,
     "inflacionMensual": 0.06,
-    "inflacionInteranual": 43.9,
+    "inflacionInteranual": 43.8507379114506,
     "promedioAnualIpc": 2.946775,
-    "variacionInteranualPromedio": null
+    "variacionInteranualPromedio": 40.23944596357544
   },
   {
     "anio": 2021,
     "mes": 2,
     "ipc": 3.7161,
     "inflacionMensual": 0.033,
-    "inflacionInteranual": 45.6,
-    "promedioAnualIpc": 3.04383333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 45.649447362232486,
+    "promedioAnualIpc": 3.043833333333333,
+    "variacionInteranualPromedio": 40.11597685716325
   },
   {
     "anio": 2021,
     "mes": 3,
     "ipc": 3.8805,
     "inflacionMensual": 0.044,
-    "inflacionInteranual": 45.4,
-    "promedioAnualIpc": 3.14483333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 45.418774592467685,
+    "promedioAnualIpc": 3.1448333333333327,
+    "variacionInteranualPromedio": 39.999668020385315
   },
   {
     "anio": 2021,
     "mes": 4,
     "ipc": 3.9826,
     "inflacionMensual": 0.026,
-    "inflacionInteranual": 46.3,
-    "promedioAnualIpc": 3.24984166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 46.28466483011937,
+    "promedioAnualIpc": 3.2498416666666667,
+    "variacionInteranualPromedio": 40.16636710653862
   },
   {
     "anio": 2021,
     "mes": 5,
     "ipc": 4.1159,
     "inflacionMensual": 0.033,
-    "inflacionInteranual": 49.3,
-    "promedioAnualIpc": 3.36309166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 49.29449744277994,
+    "promedioAnualIpc": 3.363091666666667,
+    "variacionInteranualPromedio": 40.724180685485095
   },
   {
     "anio": 2021,
     "mes": 6,
     "ipc": 4.254,
     "inflacionMensual": 0.034,
-    "inflacionInteranual": 52.6,
-    "promedioAnualIpc": 3.48528333333333,
-    "variacionInteranualPromedio": 41.72
+    "inflacionInteranual": 52.59891666965597,
+    "promedioAnualIpc": 3.4852833333333333,
+    "variacionInteranualPromedio": 41.72162609882057
   },
   {
     "anio": 2021,
     "mes": 7,
     "ipc": 4.3773,
     "inflacionMensual": 0.029,
-    "inflacionInteranual": 55.4,
-    "promedioAnualIpc": 3.61534166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 55.41077895334801,
+    "promedioAnualIpc": 3.615341666666667,
+    "variacionInteranualPromedio": 43.041947729965024
   },
   {
     "anio": 2021,
     "mes": 8,
     "ipc": 4.4795,
     "inflacionMensual": 0.023,
-    "inflacionInteranual": 56.7,
-    "promedioAnualIpc": 3.75035833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 56.66421851502115,
+    "promedioAnualIpc": 3.7503583333333332,
+    "variacionInteranualPromedio": 44.827078858542336
   },
   {
     "anio": 2021,
     "mes": 9,
     "ipc": 4.5757,
     "inflacionMensual": 0.021,
-    "inflacionInteranual": 56.1,
-    "promedioAnualIpc": 3.88736666666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 56.08200300177379,
+    "promedioAnualIpc": 3.887366666666667,
+    "variacionInteranualPromedio": 46.84870627268134
   },
   {
     "anio": 2021,
     "mes": 10,
     "ipc": 4.6911,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": 53.1,
+    "inflacionInteranual": 53.11378027286375,
     "promedioAnualIpc": 4.022975,
-    "variacionInteranualPromedio": null
+    "variacionInteranualPromedio": 48.339908914215414
   },
   {
     "anio": 2021,
     "mes": 11,
     "ipc": 4.814,
     "inflacionMensual": 0.026,
-    "inflacionInteranual": 49.9,
-    "promedioAnualIpc": 4.15645,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 49.86146997478442,
+    "promedioAnualIpc": 4.1564499999999995,
+    "variacionInteranualPromedio": 49.477320914439225
   },
   {
     "anio": 2021,
     "mes": 12,
     "ipc": 5.1239,
     "inflacionMensual": 0.064,
-    "inflacionInteranual": 51,
-    "promedioAnualIpc": 4.30060833333333,
-    "variacionInteranualPromedio": 50.44
+    "inflacionInteranual": 50.96935769004125,
+    "promedioAnualIpc": 4.300608333333333,
+    "variacionInteranualPromedio": 50.433220601378196
   },
   {
     "anio": 2022,
     "mes": 1,
-    "ipc": 5.3,
+    "ipc": 5.3128,
     "inflacionMensual": 0.037,
-    "inflacionInteranual": 47.7,
-    "promedioAnualIpc": 4.44361666666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 47.71318152751134,
+    "promedioAnualIpc": 4.443616666666666,
+    "variacionInteranualPromedio": 50.755090902716596
   },
   {
     "anio": 2022,
     "mes": 2,
     "ipc": 5.5098,
     "inflacionMensual": 0.037,
-    "inflacionInteranual": 48.3,
-    "promedioAnualIpc": 4.59309166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 48.26834584645194,
+    "promedioAnualIpc": 4.593091666666667,
+    "variacionInteranualPromedio": 50.973332443068216
   },
   {
     "anio": 2022,
     "mes": 3,
     "ipc": 6.039,
     "inflacionMensual": 0.096,
-    "inflacionInteranual": 55.6,
-    "promedioAnualIpc": 4.77296666666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 55.62427522226516,
+    "promedioAnualIpc": 4.772966666666666,
+    "variacionInteranualPromedio": 51.823790828884675
   },
   {
     "anio": 2022,
     "mes": 4,
     "ipc": 6.361,
     "inflacionMensual": 0.053,
-    "inflacionInteranual": 59.7,
-    "promedioAnualIpc": 4.97116666666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 59.719781047556864,
+    "promedioAnualIpc": 4.971166666666667,
+    "variacionInteranualPromedio": 52.94338384700446
   },
   {
     "anio": 2022,
     "mes": 5,
     "ipc": 6.6295,
     "inflacionMensual": 0.042,
-    "inflacionInteranual": 61.1,
-    "promedioAnualIpc": 5.18063333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 61.07048276197187,
+    "promedioAnualIpc": 5.180633333333334,
+    "variacionInteranualPromedio": 53.92471595693713
   },
   {
     "anio": 2022,
     "mes": 6,
     "ipc": 6.9912,
     "inflacionMensual": 0.055,
-    "inflacionInteranual": 64.3,
-    "promedioAnualIpc": 5.40873333333333,
-    "variacionInteranualPromedio": 54.91
+    "inflacionInteranual": 64.34414668547252,
+    "promedioAnualIpc": 5.408733333333333,
+    "variacionInteranualPromedio": 54.90348512492184
   },
   {
     "anio": 2022,
     "mes": 7,
     "ipc": 7.314,
     "inflacionMensual": 0.046,
-    "inflacionInteranual": 67.1,
-    "promedioAnualIpc": 5.65345833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 67.08930162428895,
+    "promedioAnualIpc": 5.653458333333333,
+    "variacionInteranualPromedio": 55.87669534750026
   },
   {
     "anio": 2022,
     "mes": 8,
     "ipc": 7.8221,
     "inflacionMensual": 0.069,
-    "inflacionInteranual": 74.6,
-    "promedioAnualIpc": 5.93200833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 74.61993526063178,
+    "promedioAnualIpc": 5.932008333333333,
+    "variacionInteranualPromedio": 57.37300507630113
   },
   {
     "anio": 2022,
     "mes": 9,
     "ipc": 8.1753,
     "inflacionMensual": 0.045,
-    "inflacionInteranual": 78.7,
-    "promedioAnualIpc": 6.231975,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 78.66774482592827,
+    "promedioAnualIpc": 6.231975000000001,
+    "variacionInteranualPromedio": 59.255150228314015
   },
   {
     "anio": 2022,
     "mes": 10,
     "ipc": 8.6392,
     "inflacionMensual": 0.057,
-    "inflacionInteranual": 84.2,
-    "promedioAnualIpc": 6.56098333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 84.16149730340435,
+    "promedioAnualIpc": 6.560983333333334,
+    "variacionInteranualPromedio": 61.842459980859054
   },
   {
     "anio": 2022,
     "mes": 11,
     "ipc": 9.1409,
     "inflacionMensual": 0.058,
-    "inflacionInteranual": 89.9,
-    "promedioAnualIpc": 6.92155833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 89.88159534690487,
+    "promedioAnualIpc": 6.9215583333333335,
+    "variacionInteranualPromedio": 65.17747042853576
   },
   {
     "anio": 2022,
     "mes": 12,
     "ipc": 9.7055,
     "inflacionMensual": 0.062,
-    "inflacionInteranual": 89.4,
-    "promedioAnualIpc": 7.30335833333333,
-    "variacionInteranualPromedio": 68.38
+    "inflacionInteranual": 89.41626495442927,
+    "promedioAnualIpc": 7.3033583333333345,
+    "variacionInteranualPromedio": 68.38137936723477
   },
   {
     "anio": 2023,
     "mes": 1,
     "ipc": 10.5352,
     "inflacionMensual": 0.085,
-    "inflacionInteranual": 98.3,
-    "promedioAnualIpc": 7.73855833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 98.29844902876073,
+    "promedioAnualIpc": 7.738558333333334,
+    "variacionInteranualPromedio": 72.59681832567222
   },
   {
     "anio": 2023,
     "mes": 2,
     "ipc": 11.2666,
     "inflacionMensual": 0.069,
-    "inflacionInteranual": 104.5,
-    "promedioAnualIpc": 8.21829166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 104.48292134015756,
+    "promedioAnualIpc": 8.218291666666667,
+    "variacionInteranualPromedio": 77.281366283481
   },
   {
     "anio": 2023,
     "mes": 3,
     "ipc": 12.2469,
     "inflacionMensual": 0.087,
-    "inflacionInteranual": 102.8,
-    "promedioAnualIpc": 8.73561666666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 102.79682066567312,
+    "promedioAnualIpc": 8.735616666666667,
+    "variacionInteranualPromedio": 81.21241173709835
   },
   {
     "anio": 2023,
     "mes": 4,
     "ipc": 13.002,
     "inflacionMensual": 0.062,
-    "inflacionInteranual": 104.4,
-    "promedioAnualIpc": 9.28903333333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 104.40182361263952,
+    "promedioAnualIpc": 9.289033333333332,
+    "variacionInteranualPromedio": 84.93591528418857
   },
   {
     "anio": 2023,
     "mes": 5,
     "ipc": 14.0534,
     "inflacionMensual": 0.081,
-    "inflacionInteranual": 112,
-    "promedioAnualIpc": 9.90769166666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 111.9828041330417,
+    "promedioAnualIpc": 9.907691666666667,
+    "variacionInteranualPromedio": 89.17860873177771
   },
   {
     "anio": 2023,
     "mes": 6,
     "ipc": 14.8861,
     "inflacionMensual": 0.059,
-    "inflacionInteranual": 112.9,
-    "promedioAnualIpc": 10.5656,
-    "variacionInteranualPromedio": 93.23
+    "inflacionInteranual": 112.92625014303698,
+    "promedioAnualIpc": 10.565599999999998,
+    "variacionInteranualPromedio": 93.22711735324141
   },
   {
     "anio": 2023,
     "mes": 7,
     "ipc": 16.0606,
     "inflacionMensual": 0.079,
-    "inflacionInteranual": 119.6,
-    "promedioAnualIpc": 11.2944833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 119.58709324582992,
+    "promedioAnualIpc": 11.294483333333332,
+    "variacionInteranualPromedio": 97.60193332170316
   },
   {
     "anio": 2023,
     "mes": 8,
     "ipc": 18.1697,
     "inflacionMensual": 0.131,
-    "inflacionInteranual": 132.3,
-    "promedioAnualIpc": 12.1567833333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 132.28672607100393,
+    "promedioAnualIpc": 12.156783333333331,
+    "variacionInteranualPromedio": 102.4074992225675
   },
   {
     "anio": 2023,
     "mes": 9,
     "ipc": 20.7732,
     "inflacionMensual": 0.143,
-    "inflacionInteranual": 154.1,
-    "promedioAnualIpc": 13.2066083333333,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 154.09709735422555,
+    "promedioAnualIpc": 13.206608333333334,
+    "variacionInteranualPromedio": 108.69327859992563
   },
   {
     "anio": 2023,
     "mes": 10,
     "ipc": 21.9551,
     "inflacionMensual": 0.057,
-    "inflacionInteranual": 154.1,
-    "promedioAnualIpc": 14.3162666666667,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 154.13348458190575,
+    "promedioAnualIpc": 14.31626666666667,
+    "variacionInteranualPromedio": 114.52427753980074
   },
   {
     "anio": 2023,
     "mes": 11,
     "ipc": 25.0704,
     "inflacionMensual": 0.142,
-    "inflacionInteranual": 174.3,
-    "promedioAnualIpc": 15.643725,
-    "variacionInteranualPromedio": null
+    "inflacionInteranual": 174.2662101106018,
+    "promedioAnualIpc": 15.643725000000003,
+    "variacionInteranualPromedio": 121.55632877010883
   },
   {
     "anio": 2023,
     "mes": 12,
     "ipc": 31.6121,
     "inflacionMensual": 0.261,
-    "inflacionInteranual": 225.7,
+    "inflacionInteranual": 225.71325537066613,
     "promedioAnualIpc": 17.469275,
-    "variacionInteranualPromedio": 132.92
+    "variacionInteranualPromedio": 132.91441130479524
   },
   {
     "anio": 2024,
     "mes": 1,
     "ipc": 38.1319,
     "inflacionMensual": 0.206,
-    "inflacionInteranual": 261.9,
-    "promedioAnualIpc": 19.769,
-    "variacionInteranualPromedio": 146.55
+    "inflacionInteranual": 261.9475662540816,
+    "promedioAnualIpc": 19.769000000000002,
+    "variacionInteranualPromedio": 146.55183774023862
   },
   {
     "anio": 2024,
     "mes": 2,
     "ipc": 42.1329,
     "inflacionMensual": 0.105,
-    "inflacionInteranual": 274,
-    "promedioAnualIpc": 22.3411916666667,
-    "variacionInteranualPromedio": 160.68
+    "inflacionInteranual": 273.96286368558395,
+    "promedioAnualIpc": 22.341191666666663,
+    "variacionInteranualPromedio": 160.67516626902415
   },
   {
     "anio": 2024,
     "mes": 3,
     "ipc": 46.7242,
     "inflacionMensual": 0.109,
-    "inflacionInteranual": 281.5,
-    "promedioAnualIpc": 25.2143,
-    "variacionInteranualPromedio": 175.57
+    "inflacionInteranual": 281.518588377467,
+    "promedioAnualIpc": 25.214299999999998,
+    "variacionInteranualPromedio": 175.56864691167365
   },
   {
     "anio": 2024,
     "mes": 4,
     "ipc": 50.557,
     "inflacionMensual": 0.082,
-    "inflacionInteranual": 288.8,
-    "promedioAnualIpc": 28.3438833333333,
-    "variacionInteranualPromedio": 190.93
+    "inflacionInteranual": 288.840178434087,
+    "promedioAnualIpc": 28.343883333333338,
+    "variacionInteranualPromedio": 190.9385098134609
   },
   {
     "anio": 2024,
     "mes": 5,
     "ipc": 52.2483,
     "inflacionMensual": 0.033,
-    "inflacionInteranual": 271.8,
-    "promedioAnualIpc": 31.5267916666667,
-    "variacionInteranualPromedio": 204.25
+    "inflacionInteranual": 271.78405225781665,
+    "promedioAnualIpc": 31.526791666666668,
+    "variacionInteranualPromedio": 204.2552804905255
   },
   {
     "anio": 2024,
     "mes": 6,
     "ipc": 54.5133,
     "inflacionMensual": 0.043,
-    "inflacionInteranual": 266.2,
-    "promedioAnualIpc": 34.8290583333333,
-    "variacionInteranualPromedio": 217.03
+    "inflacionInteranual": 266.20269916230575,
+    "promedioAnualIpc": 34.82905833333334,
+    "variacionInteranualPromedio": 217.02831790879793
   },
   {
     "anio": 2024,
     "mes": 7,
     "ipc": 57.1538,
     "inflacionMensual": 0.048,
-    "inflacionInteranual": 255.9,
-    "promedioAnualIpc": 38.2534916666667,
-    "variacionInteranualPromedio": 228.38
+    "inflacionInteranual": 255.86341730694988,
+    "promedioAnualIpc": 38.25349166666667,
+    "variacionInteranualPromedio": 228.38467824722457
   },
   {
     "anio": 2024,
     "mes": 8,
     "ipc": 59.0832,
     "inflacionMensual": 0.034,
-    "inflacionInteranual": 225.2,
+    "inflacionInteranual": 225.17432869007195,
     "promedioAnualIpc": 41.66295,
-    "variacionInteranualPromedio": 236.13
+    "variacionInteranualPromedio": 236.12531179881356
   },
   {
     "anio": 2024,
     "mes": 9,
     "ipc": 60.5834,
     "inflacionMensual": 0.025,
-    "inflacionInteranual": 191.6,
-    "promedioAnualIpc": 44.9804666666667,
-    "variacionInteranualPromedio": 239.25
+    "inflacionInteranual": 191.64211580305394,
+    "promedioAnualIpc": 44.98046666666667,
+    "variacionInteranualPromedio": 239.25406333621595
   },
   {
     "anio": 2024,
     "mes": 10,
     "ipc": 62.1845,
     "inflacionMensual": 0.026,
-    "inflacionInteranual": 183.2,
-    "promedioAnualIpc": 48.3329166666667,
-    "variacionInteranualPromedio": 241.68
+    "inflacionInteranual": 183.2348748126859,
+    "promedioAnualIpc": 48.33291666666667,
+    "variacionInteranualPromedio": 241.67917918878098
   },
   {
     "anio": 2024,
     "mes": 11,
     "ipc": 63.9879,
     "inflacionMensual": 0.029,
-    "inflacionInteranual": 155.2,
-    "promedioAnualIpc": 51.5760416666667,
-    "variacionInteranualPromedio": 240.08
+    "inflacionInteranual": 155.23286425426002,
+    "promedioAnualIpc": 51.57604166666666,
+    "variacionInteranualPromedio": 240.09306703408583
   },
   {
     "anio": 2024,
     "mes": 12,
     "ipc": 66.1736,
     "inflacionMensual": 0.034,
-    "inflacionInteranual": 109.3,
-    "promedioAnualIpc": 54.4561666666667,
-    "variacionInteranualPromedio": 230.38
+    "inflacionInteranual": 109.32997175132301,
+    "promedioAnualIpc": 54.456166666666654,
+    "variacionInteranualPromedio": 230.39446006580727
   },
   {
     "anio": 2025,
     "mes": 1,
     "ipc": 67.7266,
     "inflacionMensual": 0.023,
-    "inflacionInteranual": 77.6,
-    "promedioAnualIpc": 56.9223916666667,
-    "variacionInteranualPromedio": 215.03
+    "inflacionInteranual": 77.61139623255072,
+    "promedioAnualIpc": 56.92239166666666,
+    "variacionInteranualPromedio": 215.033112564013
   },
   {
     "anio": 2025,
     "mes": 2,
     "ipc": 69.7452,
     "inflacionMensual": 0.0298,
-    "inflacionInteranual": 65.5,
-    "promedioAnualIpc": 59.2234166666667,
-    "variacionInteranualPromedio": 197.65
+    "inflacionInteranual": 65.53619617923286,
+    "promedioAnualIpc": 59.22341666666666,
+    "variacionInteranualPromedio": 197.6642236051504
   },
   {
     "anio": 2025,
     "mes": 3,
     "ipc": 72.4941,
     "inflacionMensual": 0.0394,
-    "inflacionInteranual": 55.15,
-    "promedioAnualIpc": 61.3709083333333,
-    "variacionInteranualPromedio": 178.79
+    "inflacionInteranual": 55.15321824664734,
+    "promedioAnualIpc": 61.370908333333325,
+    "variacionInteranualPromedio": 178.8004427609154
   },
   {
     "anio": 2025,
     "mes": 4,
     "ipc": 74.7624,
     "inflacionMensual": 0.0313,
-    "inflacionInteranual": 47.88,
-    "promedioAnualIpc": 63.388025,
-    "variacionInteranualPromedio": 158.71
+    "inflacionInteranual": 47.877445259805754,
+    "promedioAnualIpc": 63.38802499999999,
+    "variacionInteranualPromedio": 158.72021499639195
   },
   {
     "anio": 2025,
     "mes": 5,
     "ipc": 75.8355,
     "inflacionMensual": 0.0144,
-    "inflacionInteranual": 45.14,
-    "promedioAnualIpc": 65.353625,
-    "variacionInteranualPromedio": 139.82
+    "inflacionInteranual": 45.14443532134058,
+    "promedioAnualIpc": 65.35362500000001,
+    "variacionInteranualPromedio": 139.83358025168562
   },
   {
     "anio": 2025,
     "mes": 6,
     "ipc": 76.4302,
     "inflacionMensual": 0.0078,
-    "inflacionInteranual": 40.2,
-    "promedioAnualIpc": 67.1800333333333,
-    "variacionInteranualPromedio": 120.99
+    "inflacionInteranual": 40.204683994548105,
+    "promedioAnualIpc": 67.18003333333334,
+    "variacionInteranualPromedio": 121.00041232103916
   },
   {
     "anio": 2025,
     "mes": 7,
     "ipc": 77.5183,
     "inflacionMensual": 0.0142,
-    "inflacionInteranual": 35.63,
-    "promedioAnualIpc": 68.877075,
-    "variacionInteranualPromedio": 102.63
+    "inflacionInteranual": 35.63105165360834,
+    "promedioAnualIpc": 68.87707499999999,
+    "variacionInteranualPromedio": 102.6477151832607
   },
   {
     "anio": 2025,
     "mes": 8,
     "ipc": 78.9645,
     "inflacionMensual": 0.0187,
-    "inflacionInteranual": 33.65,
+    "inflacionInteranual": 33.64966691039078,
     "promedioAnualIpc": 70.53385,
-    "variacionInteranualPromedio": 86.67
+    "variacionInteranualPromedio": 86.68732670162062
   },
   {
     "anio": 2025,
     "mes": 9,
     "ipc": 80.3952,
     "inflacionMensual": 0.0181,
-    "inflacionInteranual": 32.7,
-    "promedioAnualIpc": 72.1848333333333,
-    "variacionInteranualPromedio": 73.43
+    "inflacionInteranual": 32.70169716456983,
+    "promedioAnualIpc": 72.18483333333334,
+    "variacionInteranualPromedio": 73.44229181508028
   },
   {
     "anio": 2025,
     "mes": 10,
     "ipc": 82.0926,
     "inflacionMensual": 0.0211,
-    "inflacionInteranual": 32.01,
-    "promedioAnualIpc": 73.8438416666667,
-    "variacionInteranualPromedio": 60.83
+    "inflacionInteranual": 32.01456954707365,
+    "promedioAnualIpc": 73.84384166666668,
+    "variacionInteranualPromedio": 60.84059970961258
   },
   {
     "anio": 2025,
     "mes": 11,
     "ipc": 84.3935,
     "inflacionMensual": 0.028,
-    "inflacionInteranual": 31.89,
-    "promedioAnualIpc": 75.5443083333333,
-    "variacionInteranualPromedio": 50.55
+    "inflacionInteranual": 31.8897791613727,
+    "promedioAnualIpc": 75.54430833333335,
+    "variacionInteranualPromedio": 50.562009285205306
   },
   {
     "anio": 2025,
     "mes": 12,
     "ipc": 86.8699,
     "inflacionMensual": 0.029,
-    "inflacionInteranual": 31.28,
+    "inflacionInteranual": 31.27576556209728,
     "promedioAnualIpc": 77.269,
-    "variacionInteranualPromedio": 44.05
+    "variacionInteranualPromedio": 44.05749210276983
   },
   {
     "anio": 2026,
     "mes": 1,
     "ipc": 89.5968,
     "inflacionMensual": 0.0314,
-    "inflacionInteranual": 32.29,
-    "promedioAnualIpc": 79.0915166666667,
-    "variacionInteranualPromedio": 40.28
+    "inflacionInteranual": 32.29189122146985,
+    "promedioAnualIpc": 79.09151666666668,
+    "variacionInteranualPromedio": 40.28086668517975
   },
   {
     "anio": 2026,
     "mes": 2,
     "ipc": 92.3861,
     "inflacionMensual": 0.0311,
-    "inflacionInteranual": 32.46,
-    "promedioAnualIpc": 80.9782583333333,
-    "variacionInteranualPromedio": 37.52
+    "inflacionInteranual": 32.4623056497078,
+    "promedioAnualIpc": 80.97825833333333,
+    "variacionInteranualPromedio": 37.52470914105266
   },
   {
     "anio": 2026,
     "mes": 3,
     "ipc": 95.7346,
     "inflacionMensual": 0.0362,
-    "inflacionInteranual": 32.06,
-    "promedioAnualIpc": 82.9149666666667,
-    "variacionInteranualPromedio": 35.6
+    "inflacionInteranual": 32.058470965223364,
+    "promedioAnualIpc": 82.91496666666667,
+    "variacionInteranualPromedio": 35.600146867600664
   },
   {
     "anio": 2026,
     "mes": 4,
     "ipc": 97.8335,
     "inflacionMensual": 0.0219,
-    "inflacionInteranual": 30.86,
-    "promedioAnualIpc": 84.8375583333333,
-    "variacionInteranualPromedio": 34.18
+    "inflacionInteranual": 30.859228703198394,
+    "promedioAnualIpc": 84.83755833333333,
+    "variacionInteranualPromedio": 34.18196215455005
   },
   {
     "anio": 2026,
     "mes": 5,
     "ipc": 100,
-    "inflacionMensual": 0.021,
-    "inflacionInteranual": 31.86,
-    "promedioAnualIpc": 86.8512666666667,
-    "variacionInteranualPromedio": 33.07
+    "inflacionMensual": 0.0221,
+    "inflacionInteranual": 31.864364314865746,
+    "promedioAnualIpc": 86.85126666666667,
+    "variacionInteranualPromedio": 33.07528957067715
   },
   {
     "anio": 2026,
     "mes": 6,
     "ipc": 101.6,
     "inflacionMensual": 0.016,
-    "inflacionInteranual": null,
+    "inflacionInteranual": 32.93174687492639,
     "promedioAnualIpc": 88.94875,
-    "variacionInteranualPromedio": 32.4263636363636
+    "variacionInteranualPromedio": 32.46921147737534
   }
 ]

@@ -10,7 +10,7 @@ function App() {
   return (
     <>
     <Routes>
-       <Route path="/" element={<Navigate to="/admin" replace />} />
+       <Route path="/" element={<Navigate to="/calculadora" replace />} />
 
       <Route
         path="/calculadora"
@@ -21,7 +21,7 @@ function App() {
         }
       />
 
-      <Route path="/admin" element={<LayoutConSidebar />}>
+      <Route path="/administrador" element={<LayoutConSidebar />}>
         <Route index element={<Calculadora />} />
         <Route path="ingreso" element={<CargaDatos />} />
       </Route>

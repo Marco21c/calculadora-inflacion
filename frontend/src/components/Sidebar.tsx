@@ -4,8 +4,8 @@ import { Calculator, ChevronLeft, ChevronRight, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const enlaces = [
-  { to: '/admin', label: 'Vista calculadora', exacto: true, Icono: Calculator },
-  { to: '/admin/ingreso', label: 'Ingreso de datos', exacto: false, Icono: Database },
+  { to: '/administrador', label: 'Vista calculadora', exacto: true, Icono: Calculator },
+  { to: '/administrador/ingreso', label: 'Ingreso de datos', exacto: false, Icono: Database },
 ]
 
 export default function Sidebar() {

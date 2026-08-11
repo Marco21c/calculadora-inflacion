@@ -69,11 +69,21 @@ function entradasCompletas(filas: IpcEntryEditable[]): IpcEntry[] {
   return filas.filter((fila): fila is IpcEntry => fila.ipc !== null && fila.inflacionMensual !== null)
 }
 
-// Recalcula, para la fila en `indice`, solo lo que quedó afectado por lo que
-// se acaba de tocar en esa misma fila: si cambió el ipc, se recalculan su
-// inflación interanual y su promedio anual de IPC; si cambió (o quedó
-// recalculada) la inflación interanual, se recalcula su variación interanual
-// promedio. No toca ninguna otra fila.
+function periodoConOffset(anio: number, mes: number, offsetMeses: number): { anio: number; mes: number } {
+  const totalMeses = anio * 12 + (mes - 1) + offsetMeses
+  return { anio: Math.floor(totalMeses / 12), mes: (totalMeses % 12) + 1 }
+}
+
+// Recalcula en cascada los campos derivados a partir de un cambio en la
+// fila `indice`:
+// - Si cambió el ipc: se recalculan su inflación interanual y su promedio
+//   anual de IPC, más los de los 11 períodos siguientes (cuya ventana móvil
+//   de 12 meses ahora incluye este ipc) y el mismo mes al año siguiente
+//   (que usa este ipc como referencia interanual).
+// - Toda inflación interanual que haya quedado recalculada (la propia fila,
+//   o la del mismo mes al año siguiente) propaga, a su vez, a la variación
+//   interanual promedio de los 12 períodos que la incluyen en su ventana
+//   móvil.
 function conDerivadosRecalculados(
   filas: IpcEntryEditable[],
   indice: number,
@@ -82,27 +92,56 @@ function conDerivadosRecalculados(
 ): IpcEntryEditable[] {
   if (!ipcTocado && !interanualTocado) return filas
 
-  let fila = filas[indice]
-  const anteriores = entradasCompletas(filas.slice(0, indice))
+  const indicePorClave = new Map(filas.map((fila, i) => [`${fila.anio}-${fila.mes}`, i]))
+  const resultado = [...filas]
+  const indicesConInteranualCambiada = new Set<number>()
 
-  if (ipcTocado && fila.ipc !== null) {
-    fila = {
-      ...fila,
-      inflacionInteranual: calcularInflacionInteranual(anteriores, fila.anio, fila.mes, fila.ipc),
-      promedioAnualIpc: calcularPromedioAnualIpc(anteriores, fila.ipc),
+  if (ipcTocado) {
+    const filaEditada = resultado[indice]
+    const indicesAfectados = new Set<number>([indice])
+    for (let offset = 1; offset <= 11; offset++) {
+      const periodo = periodoConOffset(filaEditada.anio, filaEditada.mes, offset)
+      const i = indicePorClave.get(`${periodo.anio}-${periodo.mes}`)
+      if (i !== undefined) indicesAfectados.add(i)
     }
-    interanualTocado = true
+    const periodoInteranual = periodoConOffset(filaEditada.anio, filaEditada.mes, 12)
+    const indiceInteranual = indicePorClave.get(`${periodoInteranual.anio}-${periodoInteranual.mes}`)
+    if (indiceInteranual !== undefined) indicesAfectados.add(indiceInteranual)
+
+    for (const i of Array.from(indicesAfectados).sort((a, b) => a - b)) {
+      const fila = resultado[i]
+      if (fila.ipc === null) continue
+      const anteriores = entradasCompletas(resultado.slice(0, i))
+      resultado[i] = {
+        ...fila,
+        inflacionInteranual: calcularInflacionInteranual(anteriores, fila.anio, fila.mes, fila.ipc),
+        promedioAnualIpc: calcularPromedioAnualIpc(anteriores, fila.ipc),
+      }
+      indicesConInteranualCambiada.add(i)
+    }
+  } else if (interanualTocado) {
+    indicesConInteranualCambiada.add(indice)
   }
 
-  if (interanualTocado) {
-    fila = {
+  const indicesVariacionAfectados = new Set<number>()
+  for (const i of indicesConInteranualCambiada) {
+    const fila = resultado[i]
+    for (let offset = 0; offset <= 11; offset++) {
+      const periodo = periodoConOffset(fila.anio, fila.mes, offset)
+      const j = indicePorClave.get(`${periodo.anio}-${periodo.mes}`)
+      if (j !== undefined) indicesVariacionAfectados.add(j)
+    }
+  }
+
+  for (const j of indicesVariacionAfectados) {
+    const fila = resultado[j]
+    const anteriores = entradasCompletas(resultado.slice(0, j))
+    resultado[j] = {
       ...fila,
       variacionInteranualPromedio: calcularVariacionInteranualPromedio(anteriores, fila.inflacionInteranual),
     }
   }
 
-  const resultado = [...filas]
-  resultado[indice] = fila
   return resultado
 }
 
