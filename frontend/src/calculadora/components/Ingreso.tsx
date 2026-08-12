@@ -129,7 +129,7 @@ export default function Ingreso({
   }, [mesFin, mesesDeshabilitadosFin, onMesFinChange])
 
   return (
-    <form className="flex h-full w-full flex-col gap-10">
+    <form className="flex h-full align-items w-full flex-col md:gap-10 gap-6">
       <div className="flex flex-col gap-2">
         <label htmlFor="monto" className="font-semibold text-foreground">
           Ingresar el monto a calcular:

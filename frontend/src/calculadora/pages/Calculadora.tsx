@@ -60,26 +60,26 @@ export default function Calculadora() {
   const variacionAnual = useMemo(() => getVariacionAnual(data), [data])
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
-         <div className='flex flex-row items-center justify-between gap-3 mb-2'  >
-              <h1 className='min-w-0 text-lg font-bold text-blue-900/80 sm:text-2xl md:text-3xl'>
+    <div className="px-4 sm:p-6 md:p-8">
+         <div className='mb-2 flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3'  >
+              <img src={logo} alt="Logo" title="Dipec" className="w-14 shrink-0 sm:order-2 sm:w-20 md:w-26" />
+
+              <h1 className='w-full min-w-0 mt-2 md:mt-0 text-center text-xl font-bold text-blue-900/80 sm:w-auto sm:text-left sm:text-2xl md:text-3xl'>
                CALCULADORA DE INFLACIÓN
              </h1>
-
-             <img src={logo} alt="Logo" title="Dipec" className="w-14 shrink-0 sm:w-20 md:w-26" />
           </div>
-       <div className='mb-10 flex justify-start'>
-        <p className='max-w-2xl text-xs md:text-base text-left text-semibold'>Esta herramienta le permite calcular la inflación acumulada para un determinado período,
+       <div className='mb-8 mt-4 flex justify-start'>
+        <p className='max-w-2xl text-sm md:text-base md:text-left text-center text-semibold'>Esta herramienta le permite calcular la inflación acumulada para un determinado período,
           en base al Índice de Precios al Consumidor (IPC) de San Salvador de Jujuy.</p>
        </div>
 
-       {cargando && <Loader label="Cargando datos del IPC..." className="mb-4" />}
 
        {isError && (
          <p className='mb-4 text-sm text-red-600'>No se pudieron cargar los datos del IPC. Intente nuevamente más tarde.</p>
        )}
 
        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-start bg-teal-500/20 w-full rounded-2xl px-4 py-8 sm:px-6 sm:py-10 md:px-10 md:py-14'>
+       {cargando && <Loader label="Cargando datos del IPC..." className="mb-4" />}
         <Ingreso
           monto={monto}
           onMontoChange={setMonto}
@@ -97,7 +97,7 @@ export default function Calculadora() {
         <div className='flex flex-col gap-1 min-w-0'>
           <Egreso resultado={resultado} />
           {entradasPeriodo.length > 0 && (
-            <Suspense fallback={<Loader label="Cargando gráfico..." />}>
+            <Suspense fallback={<Loader />}>
               <GraficoVariacionMensualPeriodo entradas={entradasPeriodo} />
             </Suspense>
           )}
