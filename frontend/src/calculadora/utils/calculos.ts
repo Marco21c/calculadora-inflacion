@@ -114,13 +114,18 @@ export interface VariacionAnual {
 
 // Inflación anual compuesta a partir de los meses del período (no el campo
 // inflacionInteranual, que es la variación interanual mes a mes, no por año).
+// Solo incluye años con los 12 meses cargados: un año incompleto (típico el
+// último, en curso) compondría de menos y mostraría un % engañosamente bajo.
 export function getVariacionAnual(entradas: IpcEntry[]): VariacionAnual[] {
   const acumuladoPorAnio = new Map<number, number>()
+  const mesesPorAnio = new Map<number, number>()
   for (const entrada of entradas) {
     const acumuladoPrevio = acumuladoPorAnio.get(entrada.anio) ?? 1
     acumuladoPorAnio.set(entrada.anio, acumuladoPrevio * (1 + entrada.inflacionMensual))
+    mesesPorAnio.set(entrada.anio, (mesesPorAnio.get(entrada.anio) ?? 0) + 1)
   }
   return Array.from(acumuladoPorAnio.entries())
+    .filter(([anio]) => mesesPorAnio.get(anio) === 12)
     .sort(([anioA], [anioB]) => anioA - anioB)
     .map(([anio, acumulado]) => ({ anio, variacion: (acumulado - 1) * 100 }))
 }
