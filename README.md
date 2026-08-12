@@ -86,29 +86,31 @@ El frontend apunta por defecto a `http://localhost:3001` como API (ver `VITE_API
 | backend             | `DIRECT_URL`       | Conexión directa a Supabase (puerto 5432) — la usa Prisma Migrate       | —                             |
 | backend             | `FRONTEND_ORIGIN`  | Origen permitido por CORS (poner la URL del **frontend admin en Vercel**, el único que le pega cross-origin) | `http://localhost:5173`    |
 | backend             | `PORT`             | Puerto del servidor Express (solo fuera de Vercel)                       | `3001`                       |
-| frontend            | `VITE_API_URL`     | URL base de la API. Vacía en el build público (nginx proxea `/api/*`); URL completa del backend en el build admin de Vercel | `http://localhost:3001`    |
+| frontend            | `VITE_API_URL`     | URL base de la API. Solo hace falta setearla en el build **admin** (llamada cross-origin real a Vercel); en el build **público** se puede dejar sin setear — ver nota abajo | ver nota                   |
 | docker-compose (raíz) | `BACKEND_URL`    | URL pública del backend en Vercel, sin barra final — la usa nginx para proxear `/api/*` | requerido, sin default |
 | docker-compose (raíz) | `HTTP_PORT`      | Puerto del host donde nginx publica el sitio                             | `80`                        |
 
-Sin `FRONTEND_ORIGIN` correcto, CORS bloquea las requests del admin en Vercel; el build público no depende de CORS porque nginx hace de proxy same-origin.
+Sin `FRONTEND_ORIGIN` correcto, CORS bloquea las requests del admin en Vercel; el build público no depende de CORS porque siempre hay un proxy same-origin delante (nginx, `_redirects`, etc.).
+
+**Nota sobre `VITE_API_URL`** (`frontend/src/entry-data/services/ipcAdmin.ts`): si no está seteada, el fallback es `http://localhost:3001` en `vite dev` y **cadena vacía (rutas relativas)** en cualquier build de producción. O sea que el build público funciona sin configurar nada, siempre que haya un proxy same-origin para `/api/*` delante (nginx en el VPS, `_redirects` en Netlify/Cloudflare Pages). El build admin sí necesita setearla explícitamente a la URL del backend, porque ahí la llamada es genuinamente cross-origin.
 
 ## Build
 
 ```bash
 npm run build:backend
-npm run build:public -w frontend   # sitio público, para el VPS
+npm run build:public -w frontend   # sitio público, para Netlify o el VPS
 npm run build:admin -w frontend    # panel de admin, para Vercel
 ```
 
 ## Despliegue
 
-Son **tres despliegues independientes**. El público (`/calculadora`) puede ir a un VPS propio (Docker + nginx) o a Cloudflare Pages — ninguno de los dos necesita base de datos ni backend propios, solo proxean `/api/*` al backend de Vercel.
+Son **tres despliegues independientes**. El público (`/calculadora`) puede ir a Netlify o a un VPS propio (Docker + nginx) — ninguno de los dos necesita base de datos ni backend propios, solo proxean `/api/*` al backend de Vercel.
 
 | Qué                     | Dónde                                    | Config                       |
 | ------------------------ | ------------------------------------------ | ------------------------------ |
 | Backend + Postgres        | Vercel (serverless) + Supabase           | `backend/vercel.json`         |
 | Admin (`/administrador`) | Vercel                                    | `frontend/vercel.json`        |
-| Público (`/calculadora`) | VPS (Docker + nginx) **o** Cloudflare Pages | `docker-compose.yml` / `frontend/public/_redirects` |
+| Público (`/calculadora`) | Netlify **o** VPS (Docker + nginx)         | `frontend/netlify.toml` / `docker-compose.yml` |
 
 ### Backend (Vercel)
 
@@ -123,7 +125,32 @@ npx prisma migrate deploy
 
 Proyecto de Vercel aparte con **Root Directory = `frontend/`**. `frontend/vercel.json` ya define `buildCommand: npm run build:admin` y `outputDirectory: dist-admin` — si el dashboard tiene un Build Command sobreescrito a mano, hay que actualizarlo a esos mismos valores. Variable de entorno: `VITE_API_URL` con la URL del backend de Vercel (ver arriba), porque acá sí es una llamada cross-origin real.
 
-### Público (VPS)
+### Público (Netlify)
+
+Sin Docker ni servidor propio: Netlify sirve el build estático (`dist-public/`) directo desde el repo. Config del proyecto ya versionada en `frontend/netlify.toml`:
+
+```toml
+[build]
+  command = "npm run build:public"
+  publish = "dist-public"
+```
+
+Al conectar el repo en Netlify (Add new site → Import an existing project), lo único que hay que setear a mano en el dashboard es:
+
+- **Base directory**: `frontend` (así encuentra `netlify.toml` y corre el build ahí, no en la raíz del monorepo)
+
+No hace falta build command ni publish directory aparte (ya están en el `netlify.toml`), ni tokens ni deploy command manual — Netlify buildea y deploya solo.
+
+El proxy de `/api/*` hacia el backend de Vercel y el fallback de SPA están en `frontend/public/_redirects` (Vite lo copia tal cual a `dist-public/_redirects` en el build):
+
+```
+/api/*  https://calculadora-inflacion-backend-one.vercel.app/api/:splat  200
+/*      /index.html                                                       200
+```
+
+El `200` al final de la primera regla hace que Netlify la trate como proxy (no redirect): el navegador nunca ve la URL de Vercel. Si el backend cambia de URL, hay que actualizar esa línea y volver a deployar.
+
+### Público (VPS) — alternativa a Netlify
 
 En el VPS (con Docker y Docker Compose instalados):
 
@@ -138,22 +165,3 @@ docker compose up -d --build
 Esto construye una imagen de nginx que sirve el build público (`dist-public/`) y proxea `/api/*` al backend de Vercel — el navegador ve todo como same-origin, sin CORS de por medio. El sitio queda en `http://<ip-del-vps>:${HTTP_PORT:-80}/calculadora`.
 
 Para bajarlo: `docker compose down` (o `down -v` si además se quiere borrar cualquier estado).
-
-### Público (Cloudflare Pages) — alternativa al VPS
-
-Mismo build (`dist-public/`), sin Docker ni servidor propio: Cloudflare Pages sirve el estático directo. El equivalente al proxy de nginx es `frontend/public/_redirects` (Vite lo copia tal cual a `dist-public/_redirects` en el build):
-
-```
-/api/*  https://calculadora-inflacion-backend-one.vercel.app/api/:splat  200
-/*      /index.html                                                       200
-```
-
-La primera regla proxea `/api/*` al backend de Vercel (el `200` al final hace que Cloudflare lo trate como proxy, no como redirect — el navegador nunca ve la URL de Vercel). La segunda es el fallback de SPA, para que rutas como `/calculadora` no den 404 al refrescar la página.
-
-Configuración del proyecto en el dashboard de Cloudflare Pages:
-
-- **Root directory**: `frontend`
-- **Build command**: `npm run build:public`
-- **Build output directory**: `dist-public`
-
-Si el backend de Vercel cambia de URL, hay que actualizar la primera línea de `frontend/public/_redirects` y volver a deployar.
