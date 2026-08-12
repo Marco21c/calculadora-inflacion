@@ -19,10 +19,24 @@ export default function Calculadora() {
   const anios = useMemo(() => getAniosDisponibles(data), [data])
 
   const [monto, setMonto] = useState("")
-  const [mesInicio, setMesInicio] = useState(1)
-  const [anioInicio, setAnioInicio] = useState(2017)
-  const [mesFin, setMesFin] = useState(2)
-  const [anioFin, setAnioFin] = useState(2017)
+  const [mesInicio, setMesInicio] = useState(0)
+  const [anioInicio, setAnioInicio] = useState(0)
+  const [mesFin, setMesFin] = useState(0)
+  const [anioFin, setAnioFin] = useState(0)
+
+  // Período por defecto: el mes final es el último cargado, el inicial el
+  // anterior a ese. Se aplica una sola vez, apenas llegan los datos (antes
+  // de eso los selects de mes/año ni siquiera tienen opciones para elegir).
+  const [defaultsAplicados, setDefaultsAplicados] = useState(false)
+  if (!defaultsAplicados && data.length > 0) {
+    setDefaultsAplicados(true)
+    const ultima = data[data.length - 1]
+    const anterior = data.length > 1 ? data[data.length - 2] : ultima
+    setMesFin(ultima.mes)
+    setAnioFin(ultima.anio)
+    setMesInicio(anterior.mes)
+    setAnioInicio(anterior.anio)
+  }
 
   const resultado = useMemo(() => {
     // El monto solo afecta el monto final en pesos; la inflación acumulada
